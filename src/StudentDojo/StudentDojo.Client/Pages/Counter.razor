@@ -1,0 +1,65 @@
+﻿@page "/counter"
+
+@implements IAsyncDisposable
+
+
+<PageTitle>Counter</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Counter</MudText>
+
+<MudText Class="mb-4">Current count: @_counter</MudText>
+
+<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCounter">Click me</MudButton>
+
+@code {
+
+    [Inject] public CounterService CounterService { get; set; } = default!;
+
+    [Inject] ISnackbar Snackbar { get; set; } = default!;
+
+    private int _counter = 0;
+    private bool _isConnected = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CounterService.CounterUpdated += OnCounterUpdated;
+
+        try
+        {
+            await CounterService.StartAsync();
+            _isConnected = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SignalR connection failed: {ex.Message}");
+        }
+
+        StateHasChanged();
+    }
+
+    private void OnCounterUpdated(int newCounter)
+    {
+        _counter = newCounter;
+
+        Snackbar.Add("Counter was updated!", severity: Severity.Warning);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task IncrementCounter()
+    {
+        try
+        {
+            await CounterService.IncrementCounterAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to increment counter: {ex.Message}");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        CounterService.CounterUpdated -= OnCounterUpdated;
+        await CounterService.DisposeAsync();
+    }
+}
