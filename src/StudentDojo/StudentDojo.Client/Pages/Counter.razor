@@ -1,6 +1,4 @@
 ﻿@page "/counter"
-
-@inherits OwningComponentBase<CounterService>
 @implements IAsyncDisposable
 
 
@@ -13,7 +11,7 @@
 <MudButton Disabled="@(!_isConnected)" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCounter">Click me</MudButton>
 
 @code {
-    private CounterService _counterService => Service;
+    [Inject] public CounterService CounterService { get; set; } = default!;
 
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
 
@@ -22,13 +20,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _counterService.CounterUpdated += OnCounterUpdated;
-        _counterService.ConnectionChanged += OnConnChanged;
+        CounterService.CounterUpdated += OnCounterUpdated;
+        CounterService.ConnectionChanged += OnConnChanged;
 
 
         try
         {
-            await _counterService.StartAsync();
+            await CounterService.StartAsync();
             _isConnected = true;
         }
         catch (Exception ex)
@@ -75,7 +73,7 @@
     {
         try
         {
-            await _counterService.IncrementCounterAsync();
+            await CounterService.IncrementCounterAsync();
         }
         catch (Exception ex)
         {
@@ -85,8 +83,8 @@
 
     public async ValueTask DisposeAsync()
     {
-        _counterService.CounterUpdated -= OnCounterUpdated;
-        _counterService.ConnectionChanged -= OnConnChanged;
-        await _counterService.DisposeAsync();
+        CounterService.CounterUpdated -= OnCounterUpdated;
+        CounterService.ConnectionChanged -= OnConnChanged;
+        await CounterService.DisposeAsync();
     }
 }
