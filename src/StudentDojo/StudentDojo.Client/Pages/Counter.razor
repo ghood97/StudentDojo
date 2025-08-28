@@ -13,17 +13,15 @@
 <MudButton Disabled="@(!_isConnected)" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCounter">Click me</MudButton>
 
 @code {
+    public CounterService CounterService => Service;
 
-    public CounterService CounterService { get; set; } = default!;
-
-    [Inject] ISnackbar Snackbar { get; set; } = default!;
+    [Inject] public ISnackbar Snackbar { get; set; } = default!;
 
     private int _counter;
     private bool _isConnected;
 
     protected override async Task OnInitializedAsync()
     {
-        CounterService = Service;
         CounterService.CounterUpdated += OnCounterUpdated;
         CounterService.ConnectionChanged += OnConnChanged;
 
