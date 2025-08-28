@@ -6,6 +6,6 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddMudServices();
 
-builder.Services.AddSingleton<CounterService>();
+builder.Services.AddScoped<CounterService>();
 
 await builder.Build().RunAsync();

@@ -4,60 +4,73 @@ using MudBlazor;
 
 namespace StudentDojo.Client.Services;
 
+public enum ConnectionEvent
+{
+    Closed,
+    Reconnecting,
+    Reconnected
+}
+
 public class CounterService : IAsyncDisposable
 {
-    private readonly HubConnection _hubConnection;
-    private bool _isStarted = false;
+    private HubConnection? _hubConnection;
+    private readonly NavigationManager _nav;
 
-    public CounterService(IConfiguration configuration, NavigationManager nav, ISnackbar snackbar)
+    public CounterService(NavigationManager nav)
     {
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(nav.ToAbsoluteUri("/counterHub"), options =>
-            {
-                // Configure transports for better compatibility
-                options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets |
-                                   Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
-                options.SkipNegotiation = false;
-            })
-            .WithAutomaticReconnect(new[] { TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10) })
-            .Build();
-
-        _hubConnection.On<int>("CounterUpdated", (counter) =>
-        {
-            CounterUpdated?.Invoke(counter);
-        });
-        _hubConnection.Closed += async (error) =>
-        {
-            snackbar.Add("Connection closed. Attempting to reconnect...", Severity.Error);
-        };
-
-        _hubConnection.Reconnecting += async (error) =>
-        {
-            snackbar.Add("Connection lost. Attempting to reconnect...", Severity.Warning);
-        };
-
-        _hubConnection.Reconnected += async (connectionId) =>
-        {
-            snackbar.Add("Reconnected to the server.", Severity.Success);
-            await _hubConnection.SendAsync("GetCurrentCounter");
-        };
+        _nav = nav;
     }
 
     public event Action<int>? CounterUpdated;
+    public event Action<ConnectionEvent>? ConnectionChanged;
+
+    private HubConnection CreateHubConnection()
+    {
+        var connection = new HubConnectionBuilder()
+        .WithUrl(_nav.ToAbsoluteUri("/counterHub"))
+        .WithAutomaticReconnect()
+        .Build();
+
+        // server-to-client updates
+        connection.On<int>("CounterUpdated", c => CounterUpdated?.Invoke(c));
+
+        connection.Closed += error =>
+        {
+            ConnectionChanged?.Invoke(ConnectionEvent.Closed);
+            return Task.CompletedTask;
+        };
+
+        connection.Reconnecting += error =>
+        {
+            ConnectionChanged?.Invoke(ConnectionEvent.Reconnecting);
+            return Task.CompletedTask;
+        };
+
+        connection.Reconnected += async _ =>
+        {
+            ConnectionChanged?.Invoke(ConnectionEvent.Reconnected);
+            await connection.SendAsync("GetCurrentCounter");
+        };
+
+        return connection;
+    }
 
     public async Task StartAsync()
     {
-        if (!_isStarted && _hubConnection.State == HubConnectionState.Disconnected)
+        _hubConnection ??= CreateHubConnection();
+
+        if (_hubConnection.State is HubConnectionState.Connected or HubConnectionState.Connecting or HubConnectionState.Reconnecting)
         {
-            await _hubConnection.StartAsync();
-            _isStarted = true;
-            await _hubConnection.SendAsync("GetCurrentCounter");
+            return;
         }
+
+        await _hubConnection.StartAsync();
+        await _hubConnection.SendAsync("GetCurrentCounter");
     }
 
     public async Task IncrementCounterAsync()
     {
-        if (_isStarted && _hubConnection.State == HubConnectionState.Connected)
+        if (_hubConnection?.State == HubConnectionState.Connected)
         {
             await _hubConnection.SendAsync("IncrementCounter");
         }
@@ -67,8 +80,8 @@ public class CounterService : IAsyncDisposable
     {
         if (_hubConnection is not null)
         {
-            _isStarted = false;
             await _hubConnection.DisposeAsync();
+            _hubConnection = null;
         }
     }
 }
