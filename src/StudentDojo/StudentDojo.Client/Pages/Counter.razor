@@ -13,7 +13,7 @@
 <MudButton Disabled="@(!_isConnected)" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCounter">Click me</MudButton>
 
 @code {
-    public CounterService CounterService => Service;
+    private CounterService _counterService => Service;
 
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
 
@@ -22,31 +22,32 @@
 
     protected override async Task OnInitializedAsync()
     {
-        CounterService.CounterUpdated += OnCounterUpdated;
-        CounterService.ConnectionChanged += OnConnChanged;
+        _counterService.CounterUpdated += OnCounterUpdated;
+        _counterService.ConnectionChanged += OnConnChanged;
 
 
         try
         {
-            await CounterService.StartAsync();
+            await _counterService.StartAsync();
             _isConnected = true;
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to connect to the counter service: {ex.Message}", Severity.Error, configure =>
+            await InvokeAsync(() =>
             {
-                configure.VisibleStateDuration = 25000;
+                Snackbar.Add($"Failed to connect to the counter service: {ex.Message}", Severity.Error, configure =>
+                {
+                    configure.VisibleStateDuration = 25000;
+                });
             });
         }
-
-        StateHasChanged();
     }
 
     private void OnCounterUpdated(int newCounter)
     {
         _counter = newCounter;
 
-        Snackbar.Add("Counter was updated!", severity: Severity.Warning);
+        InvokeAsync(() => Snackbar.Add("Counter was updated!", severity: Severity.Warning));
         InvokeAsync(StateHasChanged);
     }
 
@@ -56,15 +57,15 @@
         {
             case ConnectionEvent.Reconnecting:
                 _isConnected = false;
-                Snackbar.Add("Connection lost. Reconnecting...", Severity.Warning);
+                InvokeAsync(() => Snackbar.Add("Connection lost. Reconnecting...", Severity.Warning));
                 break;
             case ConnectionEvent.Reconnected:
                 _isConnected = true;
-                Snackbar.Add("Reconnected.", Severity.Success);
+                InvokeAsync(() => Snackbar.Add("Reconnected.", Severity.Success));
                 break;
             case ConnectionEvent.Closed:
                 _isConnected = false;
-                Snackbar.Add("Connection closed.", Severity.Error);
+                InvokeAsync(() => Snackbar.Add("Connection closed.", Severity.Error));
                 break;
         }
         InvokeAsync(StateHasChanged);
@@ -74,18 +75,18 @@
     {
         try
         {
-            await CounterService.IncrementCounterAsync();
+            await _counterService.IncrementCounterAsync();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to increment counter: {ex.Message}", Severity.Error);
+            await InvokeAsync(() => Snackbar.Add("An error occurred while incrementing the counter.", Severity.Error));
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        CounterService.CounterUpdated -= OnCounterUpdated;
-        CounterService.ConnectionChanged -= OnConnChanged;
-        await CounterService.DisposeAsync();
+        _counterService.CounterUpdated -= OnCounterUpdated;
+        _counterService.ConnectionChanged -= OnConnChanged;
+        await _counterService.DisposeAsync();
     }
 }
