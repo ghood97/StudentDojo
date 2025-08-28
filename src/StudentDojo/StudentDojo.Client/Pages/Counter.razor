@@ -9,7 +9,7 @@
 
 <MudText Class="mb-4">Current count: @_counter</MudText>
 
-<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCounter">Click me</MudButton>
+<MudButton Disabled="@(!_isConnected)" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCounter">Click me</MudButton>
 
 @code {
 
@@ -31,6 +31,10 @@
         }
         catch (Exception ex)
         {
+            Snackbar.Add($"Failed to connect to the counter service: {ex.Message}", Severity.Error, configure =>
+            {
+                configure.VisibleStateDuration = 25000;
+            });
             Console.WriteLine($"SignalR connection failed: {ex.Message}");
         }
 
@@ -53,6 +57,10 @@
         }
         catch (Exception ex)
         {
+            Snackbar.Add($"Failed to increment counter: {ex.Message}", Severity.Error, configure =>
+            {
+                configure.VisibleStateDuration = 25000;
+            });
             Console.WriteLine($"Failed to increment counter: {ex.Message}");
         }
     }

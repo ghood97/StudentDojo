@@ -13,7 +13,20 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.PositionClass = MudBlazor.Defaults.Classes.Position.TopRight;
 });
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -35,16 +48,18 @@ else
     app.UseHsts();
 }
 
+app.UseCors();
+
 app.UseHttpsRedirection();
 
 
 app.UseAntiforgery();
 
+app.MapHub<CounterHub>("/counterHub");
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(StudentDojo.Client._Imports).Assembly);
-
-app.MapHub<CounterHub>("/counterHub");
 
 app.Run();

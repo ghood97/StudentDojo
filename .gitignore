@@ -365,3 +365,4 @@ FodyWeavers.xsd
 docker-compose.override.yml
 
 appsettings.Development.json
+.azure
