@@ -38,8 +38,6 @@ else
     app.UseHsts();
 }
 
-app.UseCors();
-
 app.UseHttpsRedirection();
 
 
