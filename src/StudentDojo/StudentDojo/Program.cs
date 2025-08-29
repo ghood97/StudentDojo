@@ -90,23 +90,6 @@ app.UseAuthorization();
 
 app.MapDefaultEndpoints();
 
-// Minimal endpoints for login/logout
-app.MapGet("/login", async ctx =>
-{
-    await ctx.ChallengeAsync(
-        GoogleDefaults.AuthenticationScheme,
-        new AuthenticationProperties { RedirectUri = "/" });
-});
-
-app.MapPost("/logout", async ctx =>
-{
-    await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-    ctx.Response.Redirect("/");
-});
-
-app.MapGet("/api/secure-hello", () => "Hello, secure world!")
-   .RequireAuthorization();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
