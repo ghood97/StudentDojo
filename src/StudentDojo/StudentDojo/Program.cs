@@ -3,7 +3,9 @@ using MudBlazor.Services;
 using StudentDojo.Client.Pages;
 using StudentDojo.Components;
 using StudentDojo.Data;
+using StudentDojo.Extensions;
 using StudentDojo.Hubs;
+using StudentDojo.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,9 +31,21 @@ builder.Services.AddDbContextFactory<StudentDojoDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("StudentDojoDb"));
 });
 
+builder.Services.AddStudentDojoServices();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddControllers();
+
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = ctx =>
+    {
+        ctx.ProblemDetails.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier;
+    };
+});
 
 var app = builder.Build();
 
@@ -51,10 +65,13 @@ else
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAntiforgery();
 
 app.MapHub<CounterHub>("/counterHub");
+
+app.MapControllers();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
