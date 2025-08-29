@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using StudentDojo.Client.Contracts;
 using StudentDojo.Client.Contracts.DataTransfer;
-using StudentDojo.Data.Entities;
 using StudentDojo.Services;
+
 
 namespace StudentDojo.NewFolder;
 [Route("api/[controller]")]

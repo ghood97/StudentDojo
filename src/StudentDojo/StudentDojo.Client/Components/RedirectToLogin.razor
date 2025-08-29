@@ -1,0 +1,15 @@
+﻿
+@inject NavigationManager Navigation
+
+<MudOverlay Visible=true>
+    <MudCard>Logging in ... </MudCard>
+</MudOverlay>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo("/login", true);
+    }
+
+}
