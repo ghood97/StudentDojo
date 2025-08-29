@@ -1,6 +1,8 @@
 ﻿@page "/counter"
 @implements IAsyncDisposable
+@using Microsoft.AspNetCore.Authorization
 
+@attribute [Authorize]
 
 <PageTitle>Counter</PageTitle>
 
