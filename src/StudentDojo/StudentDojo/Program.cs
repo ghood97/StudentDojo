@@ -1,6 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using StudentDojo.Client.Pages;
 using StudentDojo.Components;
+using StudentDojo.Data;
 using StudentDojo.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,11 @@ builder.Services.AddMudServices(config =>
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
+});
+
+builder.Services.AddDbContextFactory<StudentDojoDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("StudentDojoDb"));
 });
 
 // Add services to the container.
