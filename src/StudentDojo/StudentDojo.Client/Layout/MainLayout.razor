@@ -1,28 +1,43 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-<MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Student Dojo</MudText>
-        <MudSpacer />
-        <MudButton OnClick="@Logout">
-            Logout
-        </MudButton>
-        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-    </MudAppBar>
-    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent Class="pt-16 pa-4">
-        @Body
-    </MudMainContent>
-</MudLayout>
 
+@if (!RendererInfo.IsInteractive)
+{
+    <PrerenderSkeleton />
+}
+else
+{
+    <MudLayout>
+        <MudAppBar Elevation="1">
+            <AuthorizeView>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+            </AuthorizeView>
+            <MudText Typo="Typo.h5" Class="ml-3">Student Dojo</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+            <AuthorizeView>
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit">
+                    <MudMenuItem OnClick="@Logout">Logout</MudMenuItem>
+                </MudMenu>
+            </AuthorizeView>
+        </MudAppBar>
+        <AuthorizeView>
+            <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+                <NavMenu />
+            </MudDrawer>
+        </AuthorizeView>
+        <MudMainContent Class="full-height">
+            <MudContainer Class="full-height" Gutters="false" MaxWidth="MaxWidth.ExtraLarge">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+}
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -31,14 +46,24 @@
 </div>
 
 @code {
+    [Inject] public AuthenticationStateProvider AuthProvider { get; set; } = default!;
+    [Inject] public IServiceProvider Services { get; set; } = default!;
+    public INavService Nav { get; set; } = default!;
+
     private bool _drawerOpen = true;
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
-    [Inject] public NavigationManager navigationManager { get; set; } = default!;
+    private bool _isAuthenticated;
 
     protected override void OnInitialized()
     {
-        base.OnInitialized();
+        if (RendererInfo.IsInteractive && Nav is null)
+        {
+            Nav = Services.GetRequiredService<INavService>();
+            // safe to use _nav from here on (only in interactive branch)
+        }
+        OnAuthChangedAsync(AuthProvider.GetAuthenticationStateAsync());
+        AuthProvider.AuthenticationStateChanged += OnAuthChangedAsync;
 
         _theme = new()
         {
@@ -60,7 +85,18 @@
 
     private void Logout()
     {
-        navigationManager.NavigateTo("auth/logout", true);
+        Nav.NavigateTo("auth/logout", redirectUri: "/", forceLoad: true);
+    }
+
+    private async void OnAuthChangedAsync(Task<AuthenticationState> stateTask)
+    {
+        AuthenticationState authState = await stateTask;
+        _isAuthenticated = authState.User.Identity?.IsAuthenticated == true;
+    }
+
+    public void Dispose()
+    {
+        AuthProvider.AuthenticationStateChanged -= OnAuthChangedAsync;
     }
 
     private readonly PaletteLight _lightPalette = new()

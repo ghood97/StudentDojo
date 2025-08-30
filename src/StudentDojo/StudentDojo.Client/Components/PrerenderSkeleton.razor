@@ -1,0 +1,107 @@
+﻿<div class="skeleton-layout">
+    <!-- App Bar Skeleton -->
+    <div class="skeleton-appbar">
+        <div class="skeleton-appbar-content">
+            <MudSkeleton SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" />
+            <MudSkeleton Width="150px" Height="28px" Class="skeleton-title" />
+            <div class="skeleton-spacer"></div>
+            <MudSkeleton SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" />
+            <MudSkeleton SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" />
+        </div>
+    </div>
+
+    <div class="skeleton-body">
+        <!-- Drawer Skeleton -->
+        <div class="skeleton-drawer">
+            <div class="skeleton-nav-items">
+                <MudSkeleton Width="80%" Height="20px" Class="skeleton-nav-item" />
+                <MudSkeleton Width="70%" Height="20px" Class="skeleton-nav-item" />
+                <MudSkeleton Width="90%" Height="20px" Class="skeleton-nav-item" />
+                <MudSkeleton Width="75%" Height="20px" Class="skeleton-nav-item" />
+                <MudSkeleton Width="85%" Height="20px" Class="skeleton-nav-item" />
+            </div>
+        </div>
+
+        <!-- Main Content Skeleton -->
+        <div class="skeleton-main-content">
+            <div class="skeleton-content-area">
+                <!-- Page Title -->
+                <MudSkeleton Width="300px" Height="36px" Class="skeleton-page-title" />
+
+                <!-- Content Blocks -->
+                <div class="skeleton-content-blocks">
+                    <MudSkeleton Width="100%" Height="20px" Class="skeleton-text-line" />
+                    <MudSkeleton Width="85%" Height="20px" Class="skeleton-text-line" />
+                    <MudSkeleton Width="92%" Height="20px" Class="skeleton-text-line" />
+
+                    <!-- Card Skeleton -->
+                    <div class="skeleton-card">
+                        <MudSkeleton Width="100%" Height="120px" SkeletonType="SkeletonType.Rectangle" />
+                        <div class="skeleton-card-content">
+                            <MudSkeleton Width="70%" Height="24px" />
+                            <MudSkeleton Width="100%" Height="16px" />
+                            <MudSkeleton Width="60%" Height="16px" />
+                        </div>
+                    </div>
+
+                    <!-- More content lines -->
+                    <MudSkeleton Width="100%" Height="20px" Class="skeleton-text-line" />
+                    <MudSkeleton Width="78%" Height="20px" Class="skeleton-text-line" />
+                    <MudSkeleton Width="95%" Height="20px" Class="skeleton-text-line" />
+
+                    <!-- Button Group Skeleton -->
+                    <div class="skeleton-button-group">
+                        <MudSkeleton Width="100px" Height="36px" SkeletonType="SkeletonType.Rectangle" />
+                        <MudSkeleton Width="120px" Height="36px" SkeletonType="SkeletonType.Rectangle" />
+                        <MudSkeleton Width="80px" Height="36px" SkeletonType="SkeletonType.Rectangle" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator Overlay -->
+    <div class="skeleton-loading-indicator">
+        <MudCard Style="width: 50vw;" Class="pa-16 text-center" Elevation="8">
+            <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h3" Color="Color.Primary">
+                    Student Dojo
+                </MudText>
+                <MudText Typo="Typo.h5" Color="Color.Default" id="loading-message">
+                    Loading application...
+                </MudText>
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </MudStack>
+        </MudCard>
+    </div>
+</div>
+
+<script>
+    (function() {
+        var messages = [
+            'Loading application...',
+            'Loading Student Dojo...',
+            'Setting up workspace...',
+            'Preparing interface...',
+            'Almost ready...',
+            'Loading components...',
+            'Finalizing setup...'
+        ];
+
+        var messageIndex = 0;
+        var messageElement = document.getElementById('loading-message');
+
+        // Set initial message
+        if (messageElement) {
+            messageElement.textContent = messages[0];
+        }
+
+        // Cycle through messages every 1.5 seconds
+        setInterval(function() {
+            messageIndex = (messageIndex + 1) % messages.length;
+            if (messageElement) {
+                messageElement.textContent = messages[messageIndex];
+            }
+        }, 750);
+    })();
+</script>

@@ -1,14 +1,14 @@
-﻿@page "/Classrooms"
+﻿@page "/classrooms"
 
 <PageTitle>My Classrooms</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+<MudContainer Class="pt-3" MaxWidth="MaxWidth.ExtraLarge">
     <MudStack>
         <MudStack Row>
             <MudText Typo="Typo.h3">
                 My Classrooms
             </MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" />
+            <MudIconButton Size="Size.Large" Icon="@Icons.Material.Filled.Add" Color="Color.Primary" />
         </MudStack>
         @if (_isLoading)
         {

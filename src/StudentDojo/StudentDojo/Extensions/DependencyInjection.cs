@@ -45,7 +45,7 @@ public static class DependencyInjection
             options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
             options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
 
-            options.SaveTokens = true; // if you want access/id tokens later
+            options.SaveTokens = true;
 
             options.Events.OnTicketReceived = async (ctx) =>
             {
@@ -57,7 +57,7 @@ public static class DependencyInjection
                 catch(Exception e)
                 {
                     ctx.HttpContext.Response.Redirect($"/error?message={Uri.EscapeDataString(e.Message)}");
-                    ctx.HandleResponse(); // Suppress the original redirect
+                    ctx.HandleResponse();
                 }
             };
         });

@@ -1,0 +1,58 @@
+﻿@page "/"
+@using System.Security.Claims
+
+@if(_isAuthorizing)
+{
+    <SplashScreen Title="Authorizing" Message="This won't take long...'" />
+}
+else
+{
+    <MudGrid Class="full" Justify="Justify.Center" Style="height: 100%;">
+        <MudItem xs="12" />
+        <MudItem>
+            <MudPaper Elevation="3" Class="pa-16">
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                    <MudText Typo="Typo.h3">
+                        Welcome to Student Dojo!
+                    </MudText>
+                    <MudText>
+                        Please login with your Google account.
+                    </MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnLoginClicked">
+                        <MudIcon Icon="@Icons.Material.Filled.Login" Class="me-2" />
+                        Login with Google
+                    </MudButton>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" />
+    </MudGrid>
+}
+
+
+@code {
+    [Inject] public AuthenticationStateProvider AuthProvider { get; set; } = default!;
+    [Inject] public INavService Nav { get; set; } = default!;
+
+    private bool _isAuthorizing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isAuthorizing = true;
+        StateHasChanged();
+
+        AuthenticationState authState = await AuthProvider.GetAuthenticationStateAsync();
+        ClaimsPrincipal user = authState.User;
+        if (user.Identity is { IsAuthenticated: true })
+        {
+            Nav.NavigateTo("/home");
+            return;
+        }
+        _isAuthorizing = false;
+    }
+
+    private void OnLoginClicked()
+    {
+        Nav.NavigateTo("auth/login", "/home", true);
+    }
+}

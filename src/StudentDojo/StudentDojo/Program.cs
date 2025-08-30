@@ -1,17 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using System.Security.Claims;
 using MudBlazor.Services;
-using StudentDojo.Client.Pages;
 using StudentDojo.Components;
+using StudentDojo.Core.Data;
 using StudentDojo.Extensions;
 using StudentDojo.Hubs;
 using StudentDojo.Middleware;
-using StudentDojo.Core.Data;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
@@ -57,7 +52,7 @@ builder.Services.AddProblemDetails(options =>
     };
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -71,7 +66,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }

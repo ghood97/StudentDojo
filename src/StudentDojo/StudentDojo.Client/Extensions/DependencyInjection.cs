@@ -1,13 +1,20 @@
-﻿using StudentDojo.Client.Services.Api;
+﻿using StudentDojo.Client.Services;
+using StudentDojo.Client.Services.Api;
 
 namespace StudentDojo.Client.Extensions;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddStudentDojoClientServices(this IServiceCollection services)
+    public static IServiceCollection AddStudentDojoApiServices(this IServiceCollection services)
     {
         // Register application services here
         services.AddScoped<IClassroomApiService, ClassroomApiService>();
+        return services;
+    }
+
+    public static IServiceCollection AddStudentDojoClientService(this IServiceCollection services)
+    {
+         services.AddScoped<INavService, NavService>();
         return services;
     }
 }

@@ -1,0 +1,15 @@
+﻿@page "/error"
+
+<MudStack>
+    <MudText Typo="Typo.h3">
+        An unhandled error occurred.
+    </MudText>
+    <MudText Typo="Typo.h5">
+        @Message
+    </MudText>
+</MudStack>
+
+@code {
+    [SupplyParameterFromQuery(Name = "message")]
+    public string? Message { get; set; }
+}

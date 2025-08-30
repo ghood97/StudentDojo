@@ -1,0 +1,46 @@
+﻿<MudOverlay Visible="@IsVisible"
+            DarkBackground="true"
+            Absolute="false"
+            Class="d-flex justify-center align-center">
+    <MudCard Class="pa-8 text-center" Style="min-width: 300px;">
+        <MudStack Spacing="4" AlignItems="AlignItems.Center">
+            @if (!string.IsNullOrEmpty(LogoIcon))
+            {
+                <MudIcon Icon="@LogoIcon" Size="Size.Large" Color="Color.Primary" />
+            }
+            else
+            {
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            }
+
+            <MudText Typo="Typo.h6" Color="Color.Primary">
+                @Title
+            </MudText>
+
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <MudText Typo="Typo.body2" Color="Color.Default">
+                    @Message
+                </MudText>
+            }
+
+            @if (ShowProgressBar)
+            {
+                <MudProgressLinear Color="Color.Primary"
+                                   Indeterminate="@(!Progress.HasValue)"
+                                   Value="@(Progress ?? 0)"
+                                   Class="mt-4"
+                                   Style="width: 100%;" />
+            }
+        </MudStack>
+    </MudCard>
+</MudOverlay>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; } = true;
+    [Parameter] public string Title { get; set; } = "Loading...";
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public string? LogoIcon { get; set; }
+    [Parameter] public bool ShowProgressBar { get; set; } = true;
+    [Parameter] public double? Progress { get; set; }
+}
