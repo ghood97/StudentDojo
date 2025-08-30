@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using StudentDojo.Data;
+using StudentDojo.Core.Data;
 using StudentDojo.Migrations;
 
 var builder = Host.CreateApplicationBuilder(args);

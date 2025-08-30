@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using StudentDojo.Client.Contracts.DataTransfer;
+using StudentDojo.Core.DataTransfer;
 using StudentDojo.Services;
 
 

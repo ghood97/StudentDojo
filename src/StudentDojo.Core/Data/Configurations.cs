@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using StudentDojo.Data.Entities;
+using StudentDojo.Core.Data.Entities;
 
-namespace StudentDojo.Data;
+namespace StudentDojo.Core.Data;
 
 public class TeacherConfiguration : IEntityTypeConfiguration<Teacher>
 {
@@ -10,13 +10,25 @@ public class TeacherConfiguration : IEntityTypeConfiguration<Teacher>
     {
         builder.HasKey(t => t.Id);
 
-        builder.Property(t => t.Name)
+        builder.Property(t => t.FirstName)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(t => t.LastName)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(t => t.DisplayName)
             .IsRequired()
             .HasMaxLength(100);
 
         builder.Property(t => t.Email)
             .IsRequired()
             .HasMaxLength(100);
+
+        builder.Property(t => t.AuthId)
+            .IsRequired()
+            .HasMaxLength(200);
 
         builder.HasMany(t => t.Classrooms)
             .WithOne(tc => tc.Teacher)

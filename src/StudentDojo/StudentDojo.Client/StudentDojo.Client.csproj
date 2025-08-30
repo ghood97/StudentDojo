@@ -17,4 +17,8 @@
     <PackageReference Include="MudBlazor" Version="8.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\StudentDojo.Core\StudentDojo.Core.csproj" />
+  </ItemGroup>
+
 </Project>

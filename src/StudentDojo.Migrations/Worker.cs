@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using StudentDojo.Data;
+using StudentDojo.Core.Data;
 using System.Diagnostics;
 
 namespace StudentDojo.Migrations;

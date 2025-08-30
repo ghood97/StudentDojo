@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using StudentDojo.Data.Entities;
+using StudentDojo.Core.Data.Entities;
 
-namespace StudentDojo.Data;
+namespace StudentDojo.Core.Data;
 
 public class StudentDojoDbContext : DbContext
 {
