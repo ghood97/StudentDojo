@@ -32,8 +32,8 @@ public static class DependencyInjection
         })
         .AddCookie(options =>
         {
-            options.LoginPath = "/login";
-            options.LogoutPath = "/logout";
+            options.LoginPath = "/auth/login";
+            options.LogoutPath = "/auth/logout";
         })
         .AddGoogle(options =>
         {
