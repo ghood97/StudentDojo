@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using StudentDojo.Client.Contracts.DataTransfer;
 using StudentDojo.Client.Services.Api;
+using StudentDojo.Core.DataTransfer;
 using System;
 using System.Collections.Generic;
 using System.Linq;

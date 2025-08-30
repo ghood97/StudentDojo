@@ -1,4 +1,4 @@
-﻿namespace StudentDojo.Data.Entities;
+﻿namespace StudentDojo.Core.Data.Entities;
 
 public class TeacherClassroom
 {

@@ -1,4 +1,4 @@
-﻿namespace StudentDojo.Client.Contracts.DataTransfer;
+﻿namespace StudentDojo.Core.DataTransfer;
 
 public class ClassroomDto
 {

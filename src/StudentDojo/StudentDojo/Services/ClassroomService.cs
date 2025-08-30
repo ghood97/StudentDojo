@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using StudentDojo.Client.Contracts.DataTransfer;
-using StudentDojo.Data;
-using StudentDojo.Data.Entities;
+using StudentDojo.Core.Data;
+using StudentDojo.Core.DataTransfer;
 
 namespace StudentDojo.Services;
 

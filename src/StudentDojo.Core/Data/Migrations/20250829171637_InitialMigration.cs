@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace StudentDojo.Migrations;
+namespace StudentDojo.Core.Migrations;
 
 /// <inheritdoc />
 public partial class InitialMigration : Migration

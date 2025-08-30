@@ -8,6 +8,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\..\StudentDojo.Core\StudentDojo.Core.csproj" />
     <ProjectReference Include="..\..\StudentDojo.ServiceDefaults\StudentDojo.ServiceDefaults.csproj" />
     <ProjectReference Include="..\StudentDojo.Client\StudentDojo.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.8" />

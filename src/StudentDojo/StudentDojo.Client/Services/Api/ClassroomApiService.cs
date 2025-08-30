@@ -1,7 +1,5 @@
-﻿using StudentDojo.Client.Contracts;
-using StudentDojo.Client.Contracts.DataTransfer;
-using StudentDojo.Client.Extensions;
-using System.Net.Http.Json;
+﻿using StudentDojo.Client.Extensions;
+using StudentDojo.Core.DataTransfer;
 
 namespace StudentDojo.Client.Services.Api;
 

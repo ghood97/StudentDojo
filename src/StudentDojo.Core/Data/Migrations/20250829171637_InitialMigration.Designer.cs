@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using StudentDojo.Data;
+using StudentDojo.Core.Data;
 
 #nullable disable
 
-namespace StudentDojo.Migrations
+namespace StudentDojo.Core.Migrations
 {
     [DbContext(typeof(StudentDojoDbContext))]
     [Migration("20250829171637_InitialMigration")]
