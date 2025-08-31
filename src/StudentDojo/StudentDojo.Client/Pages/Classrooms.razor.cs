@@ -14,6 +14,7 @@ public partial class Classrooms : ComponentBase
 
     private IEnumerable<ClassroomDto> _classrooms { get; set; } = [];
     private bool _isLoading = true;
+    private int _teacherId;
 
     public Classrooms(IClassroomApiService classroomService, ISnackbar snackbar)
     {

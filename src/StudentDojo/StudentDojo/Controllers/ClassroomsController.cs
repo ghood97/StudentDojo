@@ -22,4 +22,15 @@ public class ClassroomsController : ControllerBase
         IEnumerable<ClassroomDto> classrooms = await _classroomService.GetClassroomsAsync(teacherId);
         return Ok(classrooms);
     }
+
+    [HttpPost()]
+    public async Task<IActionResult> CreateClassroom([FromBody] string className)
+    {
+        if (string.IsNullOrWhiteSpace(className))
+        {
+            return BadRequest("Class name cannot be empty.");
+        }
+        ClassroomDto newClassroom = await _classroomService.CreateClassroom(className);
+        return CreatedAtAction(nameof(GetClassroomsByTeacher), new { teacherId = 0 }, newClassroom); // Adjust as needed
+    }
 }

@@ -7,6 +7,7 @@ namespace StudentDojo.Services;
 public interface IClassroomService
 {
     Task<IEnumerable<ClassroomDto>> GetClassroomsAsync(int teacherId);
+    Task<ClassroomDto> CreateClassroom(string className);
 }
 
 public class ClassroomService : IClassroomService
@@ -38,5 +39,20 @@ public class ClassroomService : IClassroomService
             _logger.LogError(ex, "Error fetching classrooms for teacherId {TeacherId}", teacherId);
             throw;
         }
+    }
+
+    public async Task<ClassroomDto> CreateClassroom(string className)
+    {
+        var classroom = new Core.Data.Entities.Classroom
+        {
+            ClassName = className
+        };
+        _db.Classrooms.Add(classroom);
+        await _db.SaveChangesAsync();
+        return new ClassroomDto
+        {
+            Id = classroom.Id,
+            ClassName = classroom.ClassName
+        };
     }
 }

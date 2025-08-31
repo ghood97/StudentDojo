@@ -22,4 +22,11 @@ public class ClassroomApiService : IClassroomApiService
         HttpResponseMessage res = await _client.GetAsync($"api/classrooms/teacher/{teacherId}");
         return await res.GetApiResponseAsync<IEnumerable<ClassroomDto>>();
     }
+
+    public async Task<ApiResponse<ClassroomDto>> CreateClassroomAsync(string className)
+    {
+        HttpContent classroomContent = new StringContent($"\"{className}\"", System.Text.Encoding.UTF8, "application/json");
+        HttpResponseMessage res = await _client.PostAsync("api/classrooms", classroomContent);
+        return await res.GetApiResponseAsync<ClassroomDto>();
+    }
 }
