@@ -44,6 +44,7 @@ public static class DependencyInjection
             options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "sub");
             options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
             options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
+            options.ClaimActions.MapJsonKey("picture", "picture", "url");
 
             options.SaveTokens = true;
 
