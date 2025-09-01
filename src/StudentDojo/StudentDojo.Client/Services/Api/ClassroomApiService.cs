@@ -6,27 +6,27 @@ namespace StudentDojo.Client.Services.Api;
 public interface IClassroomApiService
 {
     Task<ApiResponse<IEnumerable<ClassroomDto>>> GetClassroomsAsync(int teacherId);
+    Task<ApiResponse<ClassroomDto>> CreateClassroomAsync(ClassroomCreateDto createDto);
 }
 
 public class ClassroomApiService : IClassroomApiService
 {
-    private readonly HttpClient _client;
+    private readonly IApiClient _client;
 
-    public ClassroomApiService(HttpClient client)
+    public ClassroomApiService(IApiClient client)
     {
         _client = client;
     }
 
     public async Task<ApiResponse<IEnumerable<ClassroomDto>>> GetClassroomsAsync(int teacherId)
     {
-        HttpResponseMessage res = await _client.GetAsync($"api/classrooms/teacher/{teacherId}");
-        return await res.GetApiResponseAsync<IEnumerable<ClassroomDto>>();
+        ApiResponse<IEnumerable<ClassroomDto>> res = await _client.GetAsync<IEnumerable<ClassroomDto>>($"api/classrooms/teacher/{teacherId}");
+        return res;
     }
 
-    public async Task<ApiResponse<ClassroomDto>> CreateClassroomAsync(string className)
+    public async Task<ApiResponse<ClassroomDto>> CreateClassroomAsync(ClassroomCreateDto createDto)
     {
-        HttpContent classroomContent = new StringContent($"\"{className}\"", System.Text.Encoding.UTF8, "application/json");
-        HttpResponseMessage res = await _client.PostAsync("api/classrooms", classroomContent);
-        return await res.GetApiResponseAsync<ClassroomDto>();
+        ApiResponse<ClassroomDto> res = await _client.PostAsync<ClassroomCreateDto, ClassroomDto>("api/classrooms", createDto);
+        return res;
     }
 }

@@ -3,11 +3,22 @@
 <PageTitle>Create a new classroom</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <MudForm onsubmit="">
-        <MudTextField T="string" Label="Classroom Name" Required="true" RequiredError="Classroom name is required!" MaxLength="100" />
-    </MudForm>
+    <MudText Typo="Typo.h4">Create a new classroom</MudText>
+    <MudCard Style="width: 50%">
+        <EditForm Model="_createDto" OnValidSubmit="OnValidSubmitAsync">
+            <DataAnnotationsValidator />
+            <MudCardContent>
+                <MudTextField T="string"
+                              Label="Classroom Name"
+                              HelperText="Enter a name for this classroom"
+                              @bind-Value="_createDto.ClassName"
+                              For="@(() => _createDto.ClassName)"
+                              RequiredError="Classroom name is required!"
+                              MaxLength="100" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
+            </MudCardActions>
+        </EditForm>
+    </MudCard>
 </MudContainer>
-
-@code {
-    
-}

@@ -23,14 +23,17 @@ public class ClassroomsController : ControllerBase
         return Ok(classrooms);
     }
 
-    [HttpPost()]
-    public async Task<IActionResult> CreateClassroom([FromBody] string className)
+    [HttpPost]
+    public async Task<IActionResult> CreateClassroomAsync([FromBody] ClassroomCreateDto createDto)
     {
-        if (string.IsNullOrWhiteSpace(className))
+        try
         {
-            return BadRequest("Class name cannot be empty.");
+            ClassroomDto createdClassroom = await _classroomService.CreateClassroomAsync(createDto);
+            return Ok(createdClassroom);
         }
-        ClassroomDto newClassroom = await _classroomService.CreateClassroom(className);
-        return CreatedAtAction(nameof(GetClassroomsByTeacher), new { teacherId = 0 }, newClassroom); // Adjust as needed
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error creating classroom: {ex.Message}");
+        }
     }
 }

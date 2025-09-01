@@ -10,16 +10,20 @@ namespace StudentDojo.Services;
 public interface ITeacherService
 {
     Task<TeacherDto> EnsureTeacherExistsAsync(ClaimsPrincipal principal);
+
+    Task<TeacherDto> GetCurrentTeacherAsync();
 }
 
 public class TeacherService : ITeacherService
 {
     private readonly StudentDojoDbContext _db;
+    private readonly IHttpContextAccessor _accessor;
     private readonly ILogger<TeacherService> _logger;
 
-    public TeacherService(StudentDojoDbContext db, ILogger<TeacherService> logger)
+    public TeacherService(StudentDojoDbContext db, IHttpContextAccessor accessor, ILogger<TeacherService> logger)
     {
         _db = db;
+        _accessor = accessor;
         _logger = logger;
     }
 
@@ -59,6 +63,20 @@ public class TeacherService : ITeacherService
         await _db.SaveChangesAsync();
 
         return new TeacherDto(newTeacher);
+    }
+
+    public async Task<TeacherDto> GetCurrentTeacherAsync()
+    {
+        ClaimsPrincipal currentUser = _accessor.HttpContext?.User ?? throw new InvalidOperationException("No HttpContext or User available");
+        string authId = currentUser.GetAuthId() ?? throw new InvalidOperationException("No auth ID claim present");
+        Teacher? teacher = await GetByAuthIdAsync(authId);
+        if (teacher == null)
+        {
+            _logger.LogWarning("Teacher with AuthId {AuthId} not found", authId);
+            throw new InvalidOperationException("Current teacher not found");
+        }
+
+        return new TeacherDto(teacher);
     }
 
     private async Task<Teacher?> GetByAuthIdAsync(string authId)
