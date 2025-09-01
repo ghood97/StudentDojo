@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using StudentDojo.Client.Services;
 using StudentDojo.Client.Services.Api;
 using StudentDojo.Core.DataTransfer;
 using System;
@@ -11,15 +12,17 @@ public partial class Classrooms : ComponentBase
 {
     private readonly IClassroomApiService _classroomService;
     private readonly ISnackbar _snackbar;
+    private readonly INavService _nav;
 
     private IEnumerable<ClassroomDto> _classrooms { get; set; } = [];
     private bool _isLoading = true;
     private int _teacherId;
 
-    public Classrooms(IClassroomApiService classroomService, ISnackbar snackbar)
+    public Classrooms(IClassroomApiService classroomService, ISnackbar snackbar, INavService nav)
     {
         _classroomService = classroomService;
         _snackbar = snackbar;
+        _nav = nav;
     }
 
     protected override async Task OnInitializedAsync()
@@ -44,5 +47,10 @@ public partial class Classrooms : ComponentBase
         {
             _isLoading = false;
         }
+    }
+
+    private void OnCreateClassroom()
+    {
+        _nav.NavigateTo("/classrooms/create");
     }
 }

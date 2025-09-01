@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StudentDojo.Core.Data;
+using StudentDojo.Core.Data.Entities;
 using StudentDojo.Core.DataTransfer;
 
 namespace StudentDojo.Services;
@@ -7,17 +8,19 @@ namespace StudentDojo.Services;
 public interface IClassroomService
 {
     Task<IEnumerable<ClassroomDto>> GetClassroomsAsync(int teacherId);
-    Task<ClassroomDto> CreateClassroom(string className);
+    Task<ClassroomDto> CreateClassroomAsync(ClassroomCreateDto createDto);
 }
 
 public class ClassroomService : IClassroomService
 {
     private readonly StudentDojoDbContext _db;
+    private readonly ITeacherService _teacherService;
     private readonly ILogger<ClassroomService> _logger;
 
-    public ClassroomService(StudentDojoDbContext db, ILogger<ClassroomService> logger)
+    public ClassroomService(StudentDojoDbContext db, ITeacherService teacherService, ILogger<ClassroomService> logger)
     {
         _db = db;
+        _teacherService = teacherService;
         _logger = logger;
     }
 
@@ -27,7 +30,7 @@ public class ClassroomService : IClassroomService
         {
             return await _db.Classrooms
             .Where(c => c.Teachers.Any(t => t.TeacherId == teacherId))
-            .Select(c => new ClassroomDto
+            .Select(c => new ClassroomDto()
             {
                 Id = c.Id,
                 ClassName = c.ClassName
@@ -41,18 +44,20 @@ public class ClassroomService : IClassroomService
         }
     }
 
-    public async Task<ClassroomDto> CreateClassroom(string className)
+    public async Task<ClassroomDto> CreateClassroomAsync(ClassroomCreateDto createDto)
     {
-        var classroom = new Core.Data.Entities.Classroom
+        TeacherDto currentTeacher = await _teacherService.GetCurrentTeacherAsync();
+        Classroom newClassroom = new()
         {
-            ClassName = className
+            ClassName = createDto.ClassName,
+            Teachers = new List<TeacherClassroom>
+            {
+                new TeacherClassroom { TeacherId = currentTeacher.Id }
+            }
         };
-        _db.Classrooms.Add(classroom);
+
+        _db.Classrooms.Add(newClassroom);
         await _db.SaveChangesAsync();
-        return new ClassroomDto
-        {
-            Id = classroom.Id,
-            ClassName = classroom.ClassName
-        };
+        return new ClassroomDto(newClassroom);
     }
 }

@@ -14,6 +14,11 @@ public class TeacherDto
     public string DisplayName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
 
+    public TeacherDto()
+    {
+        
+    }
+
     public TeacherDto(Teacher entity)
     {
         Id = entity.Id;
