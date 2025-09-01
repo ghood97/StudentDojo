@@ -55,7 +55,7 @@ public class GlobalExceptionMiddleware
             ArgumentException => StatusCodes.Status400BadRequest,
             InvalidOperationException => StatusCodes.Status400BadRequest,
             OperationCanceledException oce when ctx.RequestAborted.IsCancellationRequested
-                => StatusCodes.Status499ClientClosedRequest, // client aborted
+                => StatusCodes.Status499ClientClosedRequest,
             _ => StatusCodes.Status500InternalServerError
         };
 
@@ -72,12 +72,8 @@ public class GlobalExceptionMiddleware
         problem.Extensions["traceId"] = ctx.TraceIdentifier;
         problem.Extensions["method"] = ctx.Request.Method;
 
-        // If you use FluentValidation or custom ValidationException, you can attach errors:
-        // if (ex is ValidationException vex) problem.Extensions["errors"] = vex.Errors;
-
         ctx.Response.Clear();
         ctx.Response.StatusCode = status;
-        // IProblemDetailsService will set application/problem+json
         await _problemDetails.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = ctx,

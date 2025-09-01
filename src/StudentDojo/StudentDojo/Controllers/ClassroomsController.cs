@@ -26,14 +26,7 @@ public class ClassroomsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateClassroomAsync([FromBody] ClassroomCreateDto createDto)
     {
-        try
-        {
-            ClassroomDto createdClassroom = await _classroomService.CreateClassroomAsync(createDto);
-            return Ok(createdClassroom);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, $"Error creating classroom: {ex.Message}");
-        }
+        ClassroomDto createdClassroom = await _classroomService.CreateClassroomAsync(createDto);
+        return Ok(createdClassroom);
     }
 }
