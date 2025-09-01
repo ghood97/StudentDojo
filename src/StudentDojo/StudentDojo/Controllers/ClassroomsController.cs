@@ -16,10 +16,10 @@ public class ClassroomsController : ControllerBase
         _classroomService = classroomService;
     }
 
-    [HttpGet("teacher/{teacherId}")]
-    public async Task<IActionResult> GetClassroomsByTeacher(int teacherId)
+    [HttpGet]
+    public async Task<IActionResult> GetClassroomsByTeacher()
     {
-        IEnumerable<ClassroomDto> classrooms = await _classroomService.GetClassroomsAsync(teacherId);
+        IEnumerable<ClassroomDto> classrooms = await _classroomService.GetClassroomsAsync();
         return Ok(classrooms);
     }
 
