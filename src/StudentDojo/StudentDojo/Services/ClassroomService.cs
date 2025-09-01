@@ -7,7 +7,7 @@ namespace StudentDojo.Services;
 
 public interface IClassroomService
 {
-    Task<IEnumerable<ClassroomDto>> GetClassroomsAsync(int teacherId);
+    Task<IEnumerable<ClassroomDto>> GetClassroomsAsync();
     Task<ClassroomDto> CreateClassroomAsync(ClassroomCreateDto createDto);
 }
 
@@ -24,8 +24,10 @@ public class ClassroomService : IClassroomService
         _logger = logger;
     }
 
-    public async Task<IEnumerable<ClassroomDto>> GetClassroomsAsync(int teacherId)
+    public async Task<IEnumerable<ClassroomDto>> GetClassroomsAsync()
     {
+        TeacherDto currentTeacher = await _teacherService.GetCurrentTeacherAsync();
+        int teacherId = currentTeacher.Id;
         try
         {
             return await _db.Classrooms

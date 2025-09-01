@@ -29,7 +29,7 @@ public partial class Classrooms : ComponentBase
     {
         try
         {
-            var response = await _classroomService.GetClassroomsAsync(1); // Example teacherId
+            var response = await _classroomService.GetClassroomsAsync();
             if (response.IsSuccess)
             {
                 _classrooms = response.Data;
