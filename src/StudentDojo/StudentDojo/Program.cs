@@ -52,6 +52,8 @@ builder.Services.AddProblemDetails(options =>
     };
 });
 
+builder.Services.AddHttpContextAccessor();
+
 WebApplication app = builder.Build();
 
 app.UseAuthentication();
