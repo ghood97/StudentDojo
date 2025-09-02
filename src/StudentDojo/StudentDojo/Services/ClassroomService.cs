@@ -8,6 +8,7 @@ namespace StudentDojo.Services;
 public interface IClassroomService
 {
     Task<IEnumerable<ClassroomDto>> GetClassroomsAsync();
+    Task<ClassroomDto> GetClassroomByIdAsync(int id);
     Task<ClassroomDto> CreateClassroomAsync(ClassroomCreateDto createDto);
 }
 
@@ -44,6 +45,23 @@ public class ClassroomService : IClassroomService
             _logger.LogError(ex, "Error fetching classrooms for teacherId {TeacherId}", teacherId);
             throw;
         }
+    }
+
+    public async Task<ClassroomDto?> GetClassroomByIdAsync(int id)
+    {
+        TeacherDto currentTeacher = await _teacherService.GetCurrentTeacherAsync();
+        int teacherId = currentTeacher.Id;
+        Classroom? classroom = await _db.Classrooms
+            .Include(c => c.Teachers)
+                .ThenInclude(tc => tc.Teacher)
+            .Include(c => c.Students)
+            .Where(c => c.Id == id && c.Teachers.Any(t => t.TeacherId == teacherId))
+            .FirstOrDefaultAsync();
+        if (classroom == null)
+        {
+            return null;
+        }
+        return new ClassroomDto(classroom);
     }
 
     public async Task<ClassroomDto> CreateClassroomAsync(ClassroomCreateDto createDto)

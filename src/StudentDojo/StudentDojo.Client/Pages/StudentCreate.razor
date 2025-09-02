@@ -1,0 +1,24 @@
+﻿@page "/classrooms/{classroomId:int?}/createStudent"
+
+<PageTitle>Create a new student</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <MudText Typo="Typo.h4">Create a new student</MudText>
+    <MudCard Style="width: 50%">
+        <EditForm Model="_createDto" OnValidSubmit="OnValidSubmitAsync">
+            <DataAnnotationsValidator />
+            <MudCardContent>
+                <MudTextField T="string"
+                              Label="Student Name"
+                              HelperText="Enter a name for this student"
+                              @bind-Value="_createDto.Name"
+                              For="@(() => _createDto.Name)"
+                              RequiredError="Student name is required!"
+                              MaxLength="100" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
+            </MudCardActions>
+        </EditForm>
+    </MudCard>
+</MudContainer>

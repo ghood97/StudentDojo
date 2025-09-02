@@ -14,6 +14,7 @@ public static class DependencyInjection
         // Register application services here
         services.AddScoped<ITeacherService, TeacherService>();
         services.AddScoped<IClassroomService, ClassroomService>();
+        services.AddScoped<IStudentService, StudentService>();
         return services;
     }
 

@@ -4,7 +4,7 @@ using StudentDojo.Core.DataTransfer;
 using StudentDojo.Services;
 
 
-namespace StudentDojo.NewFolder;
+namespace StudentDojo.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class ClassroomsController : ControllerBase
@@ -21,6 +21,17 @@ public class ClassroomsController : ControllerBase
     {
         IEnumerable<ClassroomDto> classrooms = await _classroomService.GetClassroomsAsync();
         return Ok(classrooms);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetClassroomById(int id)
+    {
+        ClassroomDto? classroom = await _classroomService.GetClassroomByIdAsync(id);
+        if (classroom == null)
+        {
+            return NotFound();
+        }
+        return Ok(classroom);
     }
 
     [HttpPost]

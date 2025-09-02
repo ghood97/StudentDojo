@@ -8,16 +8,17 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace StudentDojo.Client.Pages;
-public partial class Classrooms : ComponentBase
+public partial class Classroom : ComponentBase
 {
     private readonly IClassroomApiService _classroomService;
     private readonly ISnackbar _snackbar;
     private readonly INavService _nav;
 
-    private IEnumerable<ClassroomDto> _classrooms { get; set; } = [];
+    private ClassroomDto _classroom { get; set; } = new();
     private bool _isLoading = true;
+    [Parameter] public int? Id { get; set; }
 
-    public Classrooms(IClassroomApiService classroomService, ISnackbar snackbar, INavService nav)
+    public Classroom(IClassroomApiService classroomService, ISnackbar snackbar, INavService nav)
     {
         _classroomService = classroomService;
         _snackbar = snackbar;
@@ -28,10 +29,16 @@ public partial class Classrooms : ComponentBase
     {
         try
         {
-            var response = await _classroomService.GetClassroomsAsync();
+            if (Id == null)
+            {
+                _snackbar.Add("Classroom ID is required", Severity.Error);
+                _nav.NavigateTo("/classrooms");
+                return;
+            }
+            var response = await _classroomService.GetClassroomByIdAsync(Id.Value);
             if (response.IsSuccess)
             {
-                _classrooms = response.Data;
+                _classroom = response.Data;
             }
             else
             {
@@ -51,10 +58,5 @@ public partial class Classrooms : ComponentBase
     private void OnCreateClassroom()
     {
         _nav.NavigateTo("/classrooms/create");
-    }
-
-    private void OnViewClassroom(int id)
-    {
-        _nav.NavigateTo($"/classrooms/{id}");
     }
 }
