@@ -36,7 +36,7 @@ public partial class StudentCreate : ComponentBase
         if (res.IsSuccess)
         {
             _snackbar.Add("Successfully created a student", Severity.Success);
-            _nav.NavigateTo($"/classrooms/{_createDto.ClassroomId}");
+            _nav.NavigateTo($"/classrooms/{ClassroomId}");
             return;
         }
 

@@ -55,8 +55,8 @@ public partial class Classroom : ComponentBase
         }
     }
 
-    private void OnCreateClassroom()
+    private void OnCreateStudent()
     {
-        _nav.NavigateTo("/classrooms/create");
+        _nav.NavigateTo($"/classrooms/{Id}/createStudent");
     }
 }
