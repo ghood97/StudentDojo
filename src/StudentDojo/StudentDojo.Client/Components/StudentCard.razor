@@ -1,0 +1,21 @@
+﻿<MudCard Class="relative overflow-hidden">
+    <!-- Points Badge -->
+    
+        <MudCardContent Class="flex items-center gap-4">
+        
+        <MudBadge Origin=Origin.TopRight Content="@Student.Points" Color="Color.Primary" Overlap=true>
+        <!-- Student Picture -->
+        <MudAvatar Size="Size.Large" Image="" Alt="@Student.Name" />
+
+        <!-- Name -->
+        @* <div class="flex flex-row"> *@
+            <MudText Typo="Typo.h6">@Student.Name</MudText>
+            @* </div> *@
+        </MudBadge>
+        </MudCardContent>
+    
+</MudCard>
+
+@code {
+    [Parameter] public StudentDto Student { get; set; } = default!;
+}

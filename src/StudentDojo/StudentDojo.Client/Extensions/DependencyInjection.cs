@@ -9,6 +9,7 @@ public static class DependencyInjection
     {
         // Register application services here
         services.AddScoped<IClassroomApiService, ClassroomApiService>();
+        services.AddScoped<IStudentApiService, StudentApiService>();
         return services;
     }
 
