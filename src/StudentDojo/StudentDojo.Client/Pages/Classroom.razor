@@ -8,7 +8,7 @@
             <MudText Typo="Typo.h3">
                 @_classroom?.ClassName
             </MudText>
-            <MudIconButton Size="Size.Large" Icon="@Icons.Material.Filled.Add" Color="Color.Primary"/>
+            <MudIconButton Size="Size.Large" Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="OnCreateStudent"/>
         </MudStack>
         @if (_isLoading)
         {
