@@ -80,6 +80,7 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAntiforgery();
 
 app.MapHub<CounterHub>("/counterHub");
+app.MapHub<PointHub>("/pointHub");
 
 app.MapControllers();
 

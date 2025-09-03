@@ -8,8 +8,9 @@ namespace StudentDojo.Services;
 public interface IStudentService
 {
     Task<StudentDto> CreateStudentAsync(StudentCreateDto createDto);
-    Task IncrementPointsForStudent(int studentId, int points);
-    Task RedeemPointsForStudent(int studentId, int points);
+    Task<int> GetPointsAsync(int studentId);
+    Task<int> IncrementPointsForStudentAsync(int studentId, int points);
+    Task<int> RedeemPointsForStudentAsync(int studentId, int points);
 }
 
 public class StudentService : IStudentService
@@ -38,7 +39,18 @@ public class StudentService : IStudentService
         return new StudentDto(newStudent);
     }
 
-    public async Task IncrementPointsForStudent(int studentId, int points)
+    public async Task<int> GetPointsAsync(int studentId)
+    {
+        Student? student = await _db.Students.FindAsync(studentId);
+        if (student == null)
+        {
+            _logger.LogWarning("Student with ID {StudentId} not found for getting points", studentId);
+            throw new InvalidOperationException("Student not found");
+        }
+        return student.Points;
+    }
+
+    public async Task<int> IncrementPointsForStudentAsync(int studentId, int points)
     {
         Student? student = await _db.Students.FindAsync(studentId);
         if (student == null)
@@ -48,9 +60,10 @@ public class StudentService : IStudentService
         }
         student.Points += points;
         await _db.SaveChangesAsync();
+        return student.Points;
     }
 
-    public async Task RedeemPointsForStudent(int studentId, int points)
+    public async Task<int> RedeemPointsForStudentAsync(int studentId, int points)
     {
         Student? student = await _db.Students.FindAsync(studentId);
         if (student == null)
@@ -65,5 +78,6 @@ public class StudentService : IStudentService
         }
         student.Points -= points;
         await _db.SaveChangesAsync();
+        return student.Points;
     }
 }
