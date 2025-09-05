@@ -11,61 +11,48 @@ namespace StudentDojo.Client.Pages;
 public partial class Classroom : ComponentBase, IAsyncDisposable
 {
     private readonly IClassroomApiService _classroomService;
+    private readonly IStudentApiService _studentService;
     private readonly ISnackbar _snackbar;
     private readonly INavService _nav;
-    private readonly PointService _pointService;
+    private readonly PointHubService _pointHubService;
 
     private ClassroomDto _classroom { get; set; } = new();
     private bool _isLoading = true;
     private bool _isConnected = false;
-    [Parameter] public int? Id { get; set; }
+    [Parameter] public int ClassroomId { get; set; }
 
     public Classroom(
         IClassroomApiService classroomService,
+        IStudentApiService studentService,
+        PointHubService pointService,
         ISnackbar snackbar,
-        INavService nav,
-        PointService pointService)
+        INavService nav)
     {
         _classroomService = classroomService;
+        _studentService = studentService;
         _snackbar = snackbar;
         _nav = nav;
-        _pointService = pointService;
+        _pointHubService = pointService;
     }
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        ApiResponse<ClassroomDto> response = await _classroomService.GetClassroomByIdAsync(ClassroomId);
+        if (response.IsSuccess)
         {
-            if (Id == null)
-            {
-                _snackbar.Add("Classroom ID is required", Severity.Error);
-                _nav.NavigateTo("/classrooms");
-                return;
-            }
-            var response = await _classroomService.GetClassroomByIdAsync(Id.Value);
-            if (response.IsSuccess)
-            {
-                _classroom = response.Data;
-            }
-            else
-            {
-                _snackbar.Add($"Failed to load classrooms: {response.Problem.Title}", Severity.Error);
-            }
-
-            _pointService.PointsUpdated += OnPointsUpdated;
-            _pointService.ConnectionChanged += OnConnChanged;
-
-            await _pointService.StartAsync(_classroom.Id);
+            _classroom = response.Data;
+            _pointHubService.PointsUpdated += OnPointsUpdated;
+            _pointHubService.ConnectionChanged += OnConnChanged;
+            await _pointHubService.StartAsync();
+            await _pointHubService.SubscribeToClassroomAsync(ClassroomId);
             _isConnected = true;
         }
-        catch (Exception ex)
+        else
         {
-            _snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            _snackbar.Add($"Failed to load classrooms: {response.Problem.Title}", Severity.Error);
         }
-        finally
-        {
-            _isLoading = false;
-        }
+
+        _isLoading = false;
     }
 
     private void OnConnChanged(ConnectionEvent e)
@@ -90,38 +77,39 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
 
     private void OnCreateStudent()
     {
-        _nav.NavigateTo($"/classrooms/{Id}/createStudent");
+        _nav.NavigateTo($"/classrooms/{ClassroomId}/createStudent");
     }
 
-    private void OnPointsUpdated(int studentId, int points)
+    private void OnPointsUpdated(int studentId, int newPoints)
     {
-        //_counter = newCounter;
         StudentDto? student = _classroom.Students.FirstOrDefault(s => s.Id == studentId);
-        if (student == null)
+        if (student is not null && student.Points != newPoints)
         {
-            return;
+            student.Points = newPoints;
+            InvokeAsync(() => _snackbar.Add($"Points updated for {student.Name}. New Points {newPoints}", severity: Severity.Warning));
+            InvokeAsync(StateHasChanged);
         }
-        student.Points = points;
-        InvokeAsync(() => _snackbar.Add($"Points updated for {student.Name}. New Points {points}", severity: Severity.Warning));
-        InvokeAsync(StateHasChanged);
     }
 
     private async Task IncrementStudentPointsAsync(int studentId)
     {
-        try
+        ApiResponse<int> res = await _studentService.IncrementPointsAsync(ClassroomId, studentId, 1);
+        if (res.IsSuccess)
         {
-            await _pointService.IncrementPointsAsync(studentId);
+            OnPointsUpdated(studentId, res.Data);
         }
-        catch (Exception ex)
+        else
         {
-            await InvokeAsync(() => _snackbar.Add("An error occurred while incrementing the counter.", Severity.Error));
+            await InvokeAsync(() => _snackbar.Add($"Failed to increment points: {res.Problem.Title}", Severity.Error));
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        _pointService.PointsUpdated -= OnPointsUpdated;
-        _pointService.ConnectionChanged -= OnConnChanged;
-        await _pointService.DisposeAsync();
+        _pointHubService.PointsUpdated -= OnPointsUpdated;
+        _pointHubService.ConnectionChanged -= OnConnChanged;
+        await _pointHubService.UnsubscribeFromClassroomAsync(ClassroomId);
+        await _pointHubService.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 }

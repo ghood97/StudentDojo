@@ -8,7 +8,7 @@ namespace StudentDojo.Services;
 public interface IClassroomService
 {
     Task<IEnumerable<ClassroomDto>> GetClassroomsAsync();
-    Task<ClassroomDto> GetClassroomByIdAsync(int id);
+    Task<ClassroomDto?> GetClassroomByIdAsync(int id);
     Task<ClassroomDto> CreateClassroomAsync(ClassroomCreateDto createDto);
 }
 

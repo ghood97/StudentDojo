@@ -1,4 +1,4 @@
-﻿@page "/classrooms/{id:int?}"
+﻿@page "/classrooms/{ClassroomId:int}"
 
 <PageTitle>@_classroom?.ClassName </PageTitle>
 
@@ -30,7 +30,7 @@
             <MudGrid Justify="Justify.FlexStart" Spacing="3">
                 @foreach (StudentDto student in _classroom.Students)
                 {
-                    <StudentCard Student="@student" />
+                    <StudentCard Student="@student" OnPointsIncremented="IncrementStudentPointsAsync" />
                 }
             </MudGrid>
         }

@@ -12,7 +12,7 @@ public partial class StudentCreate : ComponentBase
     private readonly IStudentApiService _studentService;
     private readonly INavService _nav;
 
-    [Parameter] public int? ClassroomId { get; set; }
+    [Parameter] public int ClassroomId { get; set; }
     private StudentCreateDto _createDto = new();
 
     public StudentCreate(ISnackbar snackbar, IStudentApiService studentService, INavService nav)
@@ -23,11 +23,7 @@ public partial class StudentCreate : ComponentBase
     }
     protected override void OnParametersSet()
     {
-        if (ClassroomId.HasValue)
-        {
-            _createDto.ClassroomId = ClassroomId.Value;
-        }
-        base.OnParametersSet();
+        _createDto.ClassroomId = ClassroomId;
     }
 
     private async Task OnValidSubmitAsync(EditContext context)
