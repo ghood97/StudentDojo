@@ -16,7 +16,7 @@ public static class DependencyInjection
     public static IServiceCollection AddStudentDojoClientService(this IServiceCollection services)
     {
         services.AddScoped<INavService, NavService>();
-        services.AddScoped<PointService>();
+        services.AddScoped<PointHubService>();
         return services;
     }
 }

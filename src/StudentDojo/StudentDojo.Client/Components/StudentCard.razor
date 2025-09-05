@@ -1,14 +1,22 @@
 ﻿<MudItem xs="12" sm="6" md="3">
-        
-        <MudStack Row>
-            @* <MudImage Width="200" Height="150" Src="" Alt="@Student.Name" ObjectFit="ObjectFit.Contain" /> *@
-            <MudText Typo="Typo.h6">@Student.Name</MudText>
-            <MudChip T="string" Color="Color.Success" Size="Size.Large">@Student.Points</MudChip>
-        </MudStack>
-        <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" onclick="@(() => PointService.IncrementPointsAsync(Student.Id))"/>
+    <MudCard>
+        <MudCardContent>
+            <MudStack Row>
+                @* <MudImage Width="200" Height="150" Src="" Alt="@Student.Name" ObjectFit="ObjectFit.Contain" /> *@
+                <MudText Typo="Typo.h6">@Student.Name</MudText>
+                <MudChip T="string" Color="Color.Success" Size="Size.Large">@Student.Points</MudChip>
+            </MudStack>
+        </MudCardContent>
+        <MudCardActions>
+            <MudFab Size="Size.Small"
+                    Color="Color.Secondary"
+                    StartIcon="@Icons.Material.Filled.Add"
+                    OnClick="@(() => OnPointsIncremented.InvokeAsync(Student.Id))" />
+        </MudCardActions>
+    </MudCard>
 </MudItem>
 
 @code {
     [Parameter] public StudentDto Student { get; set; } = default!;
-    [Inject] public PointService PointService { get; set; } = default!;
+    [Parameter] public EventCallback<int> OnPointsIncremented { get; set; }
 }

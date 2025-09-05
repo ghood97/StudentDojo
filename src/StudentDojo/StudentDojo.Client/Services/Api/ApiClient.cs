@@ -8,10 +8,14 @@ namespace StudentDojo.Client.Services.Api;
 public interface IApiClient
 {
     Task<ApiResponse<T>> GetAsync<T>(string endpoint);
-
     Task<ApiResponse<T>> PostAsync<T>(string endpoint, T? data);
-
     Task<ApiResponse<TReturn>> PostAsync<TRequest, TReturn>(string endpoint, TRequest? data);
+    Task<ApiResponse<T>> PatchAsync<T>(string endpoint, T? data);
+    Task<ApiResponse<TReturn>> PatchAsync<TRequest, TReturn>(string endpoint, TRequest? data);
+    Task<ApiResponse<T>> PutAsync<T>(string endpoint, T? data);
+    Task<ApiResponse<TReturn>> PutAsync<TRequest, TReturn>(string endpoint, TRequest? data);
+    Task<ApiResponse<bool>> DeleteAsync(string endpoint);
+
 }
 
 public class ApiClient : IApiClient
@@ -58,6 +62,34 @@ public class ApiClient : IApiClient
         try
         {
             HttpResponseMessage res = await _client.PostAsJsonAsync(endpoint, data);
+            return await res.GetApiResponseAsync<TReturn>();
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse<TReturn>()
+            {
+                IsSuccess = false,
+                Problem = new ProblemDetails()
+                {
+                    Type = "UnknownErrorOccurred",
+                    Title = "An unknown error occurred",
+                    Detail = ex.Message,
+                    Status = 500
+                }
+            };
+        }
+    }
+
+    public async Task<ApiResponse<T>> PatchAsync<T>(string endpoint, T? data)
+    {
+        return await PatchAsync<T, T>(endpoint, data);
+    }
+
+    public async Task<ApiResponse<TReturn>> PatchAsync<TRequest, TReturn>(string endpoint, TRequest? data)
+    {
+        try
+        {
+            HttpResponseMessage res = await _client.PatchAsJsonAsync(endpoint, data);
             return await res.GetApiResponseAsync<TReturn>();
         }
         catch (Exception ex)

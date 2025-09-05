@@ -9,7 +9,7 @@ public interface IStudentService
 {
     Task<StudentDto> CreateStudentAsync(StudentCreateDto createDto);
     Task<int> GetPointsAsync(int studentId);
-    Task<int> IncrementPointsForStudentAsync(int studentId, int points);
+    Task<AwardPointsResult> IncrementPointsForStudentAsync(int classroomId, int studentId, int pointsDelta);
     Task<int> RedeemPointsForStudentAsync(int studentId, int points);
 }
 
@@ -50,17 +50,17 @@ public class StudentService : IStudentService
         return student.Points;
     }
 
-    public async Task<int> IncrementPointsForStudentAsync(int studentId, int points)
+    public async Task<AwardPointsResult> IncrementPointsForStudentAsync(int classroomId, int studentId, int pointsDelta)
     {
         Student? student = await _db.Students.FindAsync(studentId);
         if (student == null)
         {
             _logger.LogWarning("Student with ID {StudentId} not found for incrementing points", studentId);
-            throw new InvalidOperationException("Student not found");
+            return new(false, ServiceError.NotFound, 0);
         }
-        student.Points += points;
+        student.Points += pointsDelta;
         await _db.SaveChangesAsync();
-        return student.Points;
+        return new(true, null, student.Points);
     }
 
     public async Task<int> RedeemPointsForStudentAsync(int studentId, int points)
@@ -81,3 +81,5 @@ public class StudentService : IStudentService
         return student.Points;
     }
 }
+
+public sealed record AwardPointsResult(bool Success, ServiceError? Error, int NewPoints);
