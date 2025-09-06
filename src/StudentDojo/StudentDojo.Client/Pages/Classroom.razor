@@ -30,7 +30,7 @@
             <MudGrid Justify="Justify.FlexStart" Spacing="3">
                 @foreach (StudentDto student in _classroom.Students)
                 {
-                    <StudentCard Student="@student" OnPointsIncremented="IncrementStudentPointsAsync" />
+                    <StudentCard Student="@student" OnPointsIncremented="IncrementStudentPointsAsync" OnPointsRedeemed="RedeemPointsAsync" />
                 }
             </MudGrid>
         }

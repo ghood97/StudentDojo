@@ -38,7 +38,10 @@ builder.Services.AddStudentDojoServices();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents()
-    .AddAuthenticationStateSerialization();
+    .AddAuthenticationStateSerialization(options =>
+    {
+        options.SerializeAllClaims = true;
+    });
 
 builder.Services.AddCascadingAuthenticationState(); // for Blazor
 

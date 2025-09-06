@@ -55,21 +55,12 @@ public class NavService : INavService
         [StringSyntax("Uri")] string? redirectUri = null,
         bool forceLoad = false)
     {
-        NavigationOptions options = default;
-        if (forceLoad)
-        {
-            options = new NavigationOptions
-            {
-                ForceLoad = true
-            };
-        }
-
         if (redirectUri is not null)
         {
             uri = QueryHelpers.AddQueryString(uri, "redirectUri", redirectUri);
         }
 
-        _nav.NavigateTo(uri, options);
+        _nav.NavigateTo(uri, forceLoad);
     }
 
     public void UpdateQueryParam(string name, string? value)

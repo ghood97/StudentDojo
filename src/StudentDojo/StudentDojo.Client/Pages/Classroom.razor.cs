@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using StudentDojo.Client.Components.Dialogs;
 using StudentDojo.Client.Services;
 using StudentDojo.Client.Services.Api;
 using StudentDojo.Core.DataTransfer;
@@ -13,6 +14,7 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
     private readonly IClassroomApiService _classroomService;
     private readonly IStudentApiService _studentService;
     private readonly ISnackbar _snackbar;
+    private readonly IDialogService _dialogService;
     private readonly INavService _nav;
     private readonly PointHubService _pointHubService;
 
@@ -26,11 +28,13 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
         IStudentApiService studentService,
         PointHubService pointService,
         ISnackbar snackbar,
+        IDialogService dialogService,
         INavService nav)
     {
         _classroomService = classroomService;
         _studentService = studentService;
         _snackbar = snackbar;
+        _dialogService = dialogService;
         _nav = nav;
         _pointHubService = pointService;
     }
@@ -101,6 +105,26 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
         else
         {
             await InvokeAsync(() => _snackbar.Add($"Failed to increment points: {res.Problem.Title}", Severity.Error));
+        }
+    }
+
+    private async Task RedeemPointsAsync(int studentId)
+    {
+        IDialogReference dialog = await _dialogService.ShowAsync<RedeemPointsDialog>();
+        DialogResult? result = await dialog.Result;
+        if (result is not null && !result.Canceled)
+        {
+            int pointsToRedeem = (int)result.Data!;
+            ApiResponse<int> res = await _studentService.RedeemPointsAsync(ClassroomId, studentId, pointsToRedeem);
+            if (res.IsSuccess)
+            {
+                OnPointsUpdated(studentId, res.Data);
+                await InvokeAsync(() => _snackbar.Add($"Successfully redeemed {pointsToRedeem} points.", Severity.Success));
+            }
+            else
+            {
+                await InvokeAsync(() => _snackbar.Add($"Failed to redeem points: {res.Problem.Title}", Severity.Error));
+            }
         }
     }
 

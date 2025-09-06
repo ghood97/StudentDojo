@@ -49,7 +49,7 @@ public class PointHubService : IAsyncDisposable
             {
                 try
                 {
-                    await connection.InvokeAsync("ConnectToClassroom", classroomId);
+                    await connection.InvokeAsync("SubscribeToClassroom", classroomId);
                 }
                 catch
                 {

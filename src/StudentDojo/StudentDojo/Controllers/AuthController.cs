@@ -8,14 +8,14 @@ namespace StudentDojo.Controllers;
 
 [Route("auth")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController : BaseController
 {
     [HttpGet("login")]
     public async Task Login([FromQuery]string redirectUri = "/")
     {
         await HttpContext.ChallengeAsync(
             GoogleDefaults.AuthenticationScheme,
-            new AuthenticationProperties { RedirectUri = redirectUri });
+            new GoogleChallengeProperties { RedirectUri = redirectUri, Prompt = "select_account" });
     }
 
     [HttpGet("logout")]

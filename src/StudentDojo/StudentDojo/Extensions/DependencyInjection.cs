@@ -41,10 +41,16 @@ public static class DependencyInjection
             options.ClientId = googleOptions.ClientId;
             options.ClientSecret = googleOptions.ClientSecret;
 
+            options.Scope.Clear();
+            options.Scope.Add("openid");
+            options.Scope.Add("profile");
+            options.Scope.Add("email");
+
             // Helpful claim mappings
             options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "sub");
             options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
             options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
+            options.ClaimActions.MapJsonKey("picture", "picture");
 
             options.SaveTokens = true;
 

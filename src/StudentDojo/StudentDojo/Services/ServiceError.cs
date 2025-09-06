@@ -3,5 +3,6 @@
 public enum ServiceError
 {
     NotFound,
-    Unknown
+    Validation,
+    Unknown,
 }

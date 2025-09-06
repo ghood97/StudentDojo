@@ -10,7 +10,7 @@ public interface IStudentService
     Task<StudentDto> CreateStudentAsync(StudentCreateDto createDto);
     Task<int> GetPointsAsync(int studentId);
     Task<AwardPointsResult> IncrementPointsForStudentAsync(int classroomId, int studentId, int pointsDelta);
-    Task<int> RedeemPointsForStudentAsync(int studentId, int points);
+    Task<RedeemPointsResult> RedeemPointsForStudentAsync(int classroomId, int studentId, int points);
 }
 
 public class StudentService : IStudentService
@@ -58,28 +58,47 @@ public class StudentService : IStudentService
             _logger.LogWarning("Student with ID {StudentId} not found for incrementing points", studentId);
             return new(false, ServiceError.NotFound, 0);
         }
+        if (student.ClassroomId != classroomId)
+        {
+            _logger.LogWarning("Student with ID {StudentId} does not belong to Classroom ID {ClassroomId}", studentId, classroomId);
+            return new(false, ServiceError.Validation, student.Points);
+        }
         student.Points += pointsDelta;
         await _db.SaveChangesAsync();
         return new(true, null, student.Points);
     }
 
-    public async Task<int> RedeemPointsForStudentAsync(int studentId, int points)
+    public async Task<RedeemPointsResult> RedeemPointsForStudentAsync(int classroomId, int studentId, int points)
     {
         Student? student = await _db.Students.FindAsync(studentId);
         if (student == null)
         {
             _logger.LogWarning("Student with ID {StudentId} not found for redeeming points", studentId);
-            throw new InvalidOperationException("Student not found");
+            return new(false, RedeemPointsError.NotFound, 0);
+        }
+        if (student.ClassroomId != classroomId)
+        {
+            _logger.LogWarning("Student with ID {StudentId} does not belong to Classroom ID {ClassroomId}", studentId, classroomId);
+            return new(false, RedeemPointsError.InvalidClassroom, student.Points);
         }
         if (student.Points < points)
         {
             _logger.LogWarning("Student with ID {StudentId} has insufficient points for redemption", studentId);
-            throw new InvalidOperationException("Insufficient points");
+            return new(false, RedeemPointsError.InsufficientPoints, student.Points);
         }
         student.Points -= points;
         await _db.SaveChangesAsync();
-        return student.Points;
+        return new(true, null, student.Points);
     }
 }
 
 public sealed record AwardPointsResult(bool Success, ServiceError? Error, int NewPoints);
+
+public sealed record RedeemPointsResult(bool Success, RedeemPointsError? Error, int NewPoints);
+
+public enum RedeemPointsError
+{
+    NotFound,
+    InsufficientPoints,
+    InvalidClassroom
+}

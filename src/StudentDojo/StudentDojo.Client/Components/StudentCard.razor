@@ -1,17 +1,26 @@
 ﻿<MudItem xs="12" sm="6" md="3">
     <MudCard>
         <MudCardContent>
-            <MudStack Row>
+            <MudStack Row Class="full">
                 @* <MudImage Width="200" Height="150" Src="" Alt="@Student.Name" ObjectFit="ObjectFit.Contain" /> *@
                 <MudText Typo="Typo.h6">@Student.Name</MudText>
-                <MudChip T="string" Color="Color.Success" Size="Size.Large">@Student.Points</MudChip>
+                <MudSpacer />
+                <MudChip T="string" Color="Color.Success" Size="Size.Large">@Student.Points points</MudChip>
             </MudStack>
         </MudCardContent>
         <MudCardActions>
-            <MudFab Size="Size.Small"
-                    Color="Color.Secondary"
-                    StartIcon="@Icons.Material.Filled.Add"
-                    OnClick="@(() => OnPointsIncremented.InvokeAsync(Student.Id))" />
+            <MudStack Row Class="full">
+                <MudFab Size="Size.Small"
+                        Color="Color.Secondary"
+                        Label="Add point"
+                        StartIcon="@Icons.Material.Filled.Add"
+                        OnClick="@(() => OnPointsIncremented.InvokeAsync(Student.Id))" />
+                <MudFab Size="Size.Small"
+                        Color="Color.Info"
+                        Label="Redeem points"
+                        StartIcon="@Icons.Material.Filled.Add"
+                        OnClick="@(() => OnPointsRedeemed.InvokeAsync(Student.Id))" />
+            </MudStack>
         </MudCardActions>
     </MudCard>
 </MudItem>
@@ -19,4 +28,5 @@
 @code {
     [Parameter] public StudentDto Student { get; set; } = default!;
     [Parameter] public EventCallback<int> OnPointsIncremented { get; set; }
+    [Parameter] public EventCallback<int> OnPointsRedeemed { get; set; }
 }

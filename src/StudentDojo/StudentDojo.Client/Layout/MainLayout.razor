@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims
+@inherits LayoutComponentBase
 @implements IDisposable
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
@@ -21,6 +22,20 @@ else
             <MudSpacer />
             <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
             <AuthorizeView>
+                @if (!string.IsNullOrEmpty(_initials) && string.IsNullOrEmpty(_pictureUrl))
+                {
+                    <MudAvatar Color="Color.Primary" Size="Size.Medium">@_initials</MudAvatar>
+                }
+                else if (!string.IsNullOrEmpty(_pictureUrl))
+                {
+                    <MudAvatar Size="Size.Medium">
+                        <MudImage Src="@_pictureUrl"></MudImage>
+                    </MudAvatar>
+                }
+                else
+                {
+                    <MudAvatar Color="Color.Primary" Size="Size.Medium">?</MudAvatar>
+                }
                 <MudMenu Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit">
                     <MudMenuItem OnClick="@Logout">Logout</MudMenuItem>
                 </MudMenu>
@@ -54,6 +69,8 @@ else
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
     private bool _isAuthenticated;
+    private string? _pictureUrl;
+    private string? _initials;
 
     protected override void OnInitialized()
     {
@@ -92,6 +109,20 @@ else
     {
         AuthenticationState authState = await stateTask;
         _isAuthenticated = authState.User.Identity?.IsAuthenticated == true;
+
+        if (_isAuthenticated)
+        {
+            ClaimsPrincipal user = authState.User;
+            _pictureUrl = user.FindFirst("picture")?.Value;
+
+            if (string.IsNullOrEmpty(_pictureUrl))
+            {
+                string name = user.Identity?.Name ?? "";
+                _initials = string.Join("", name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(n => n[0]))
+                                .ToUpperInvariant();
+            }
+        }
     }
 
     public void Dispose()

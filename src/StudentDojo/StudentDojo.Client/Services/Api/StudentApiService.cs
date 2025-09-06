@@ -6,6 +6,7 @@ public interface IStudentApiService
 {
     Task<ApiResponse<StudentDto>> CreateStudentAsync(StudentCreateDto createDto);
     Task<ApiResponse<int>> IncrementPointsAsync(int classroomId, int studentId, int pointsDelta);
+    Task<ApiResponse<int>> RedeemPointsAsync(int classroomId, int studentId, int points);
 }
 
 public class StudentApiService : IStudentApiService
@@ -28,6 +29,13 @@ public class StudentApiService : IStudentApiService
     {
         ApiResponse<int> res = await _client
             .PatchAsync<int, int>($"api/classrooms/{classroomId}/students/{studentId}/points", pointsDelta);
+        return res;
+    }
+
+    public async Task<ApiResponse<int>> RedeemPointsAsync(int classroomId, int studentId, int points)
+    {
+        ApiResponse<int> res = await _client
+            .PatchAsync<int, int>($"api/classrooms/{classroomId}/students/{studentId}/redeem", points);
         return res;
     }
 }

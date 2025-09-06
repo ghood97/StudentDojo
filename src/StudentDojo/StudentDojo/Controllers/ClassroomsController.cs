@@ -7,7 +7,7 @@ using StudentDojo.Services;
 namespace StudentDojo.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class ClassroomsController : ControllerBase
+public class ClassroomsController : BaseController
 {
     private readonly IClassroomService _classroomService;
 
@@ -29,7 +29,7 @@ public class ClassroomsController : ControllerBase
         ClassroomDto? classroom = await _classroomService.GetClassroomByIdAsync(id);
         if (classroom == null)
         {
-            return NotFound();
+            return NotFoundProblem("Classroom not found");
         }
         return Ok(classroom);
     }

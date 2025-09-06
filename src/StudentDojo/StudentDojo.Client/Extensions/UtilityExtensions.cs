@@ -65,19 +65,6 @@ public static class UtilityExtensions
         }
         else
         {
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                return new ApiResponse<T>
-                {
-                    IsSuccess = false,
-                    Problem = CreateProblem(
-                        "NotFound",
-                        "Resource not found",
-                        "The requested resource was not found.",
-                        response)
-                };
-            }
-
             ProblemDetails? customError = null;
             try
             {

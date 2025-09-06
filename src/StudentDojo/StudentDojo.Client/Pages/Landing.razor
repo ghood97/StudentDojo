@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using System.Security.Claims
 
+@attribute [AllowAnonymous]
+
 @if(_isAuthorizing)
 {
     <SplashScreen Title="Authorizing" Message="This won't take long...'" />
