@@ -27,12 +27,22 @@
         }
         else
         {
-            <MudGrid Justify="Justify.FlexStart" Spacing="3">
-                @foreach (StudentDto student in _classroom.Students)
-                {
-                    <StudentCard Student="@student" OnPointsIncremented="IncrementStudentPointsAsync" OnPointsRedeemed="RedeemPointsAsync" />
-                }
-            </MudGrid>
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Gutters=false>
+                <MudGrid Justify="Justify.FlexStart" Spacing="3">
+                    @foreach (StudentDto student in _classroom.Students)
+                    {
+                        <MudItem xs="6" md="2">
+                            <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                                <StudentCard Student="@student" OnPointsIncremented="IncrementStudentPointsAsync" OnPointsRedeemed="RedeemPointsAsync" />
+                            </MudHidden>
+                            <MudHidden Breakpoint="Breakpoint.MdAndUp">
+                                <StudentChip OnPointsRedeemed="RedeemPointsAsync" Student="@student"></StudentChip>
+                            </MudHidden>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudContainer>
+
         }
     </MudStack>
 </MudContainer>

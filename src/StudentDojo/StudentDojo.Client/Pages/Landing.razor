@@ -47,7 +47,7 @@ else
         ClaimsPrincipal user = authState.User;
         if (user.Identity is { IsAuthenticated: true })
         {
-            Nav.NavigateTo("/home");
+            Nav.NavigateTo("/classrooms");
             return;
         }
         _isAuthorizing = false;
@@ -55,6 +55,6 @@ else
 
     private void OnLoginClicked()
     {
-        Nav.NavigateTo("auth/login", "/home", true);
+        Nav.NavigateTo("auth/login", "/classrooms", true);
     }
 }

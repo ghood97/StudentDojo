@@ -1,0 +1,47 @@
+﻿<MudChip OnClick="" T="string" Size="Size.Large" class="pr-0 justify-start" Style="width:100%;">
+    <AvatarContent>
+        <MudAvatar>
+            <MudImage Src="@ImageUrl"></MudImage>
+        </MudAvatar>
+    </AvatarContent>
+    <ChildContent>
+            <span>@Student.Name</span>
+            <MudSpacer></MudSpacer>
+            <MudChip T="string" Style="align-self:flex-end">
+                @Student.Points
+            </MudChip>
+    </ChildContent>
+</MudChip>
+
+
+@code {
+    [Parameter] public StudentDto Student { get; set; } = default!;
+    [Parameter] public EventCallback<int> OnPointsIncremented { get; set; }
+    [Parameter] public EventCallback<int> OnPointsRedeemed { get; set; }
+
+    private static readonly string[] AnimalImages = new[]
+    {
+        "bear.png",
+        "bunny.png",
+        "cat.png",
+        "chicken.png",
+        "cow.png",
+        "deer.png",
+        "dog.png",
+        "elephant.png",
+        "fox.png",
+        "giraffe.png",
+        "goat.png",
+        "koala.png",
+        "lion.png",
+        "monkey.png",
+        "owl.png",
+        "panda.png",
+        "pig.png",
+        "racoon.png",
+        "tiger.png",
+        "wolf.png"
+    };
+
+    public string ImageUrl => $"images/{AnimalImages[Student.Id % AnimalImages.Length]}";
+}

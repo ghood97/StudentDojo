@@ -46,10 +46,8 @@ else
                 <NavMenu />
             </MudDrawer>
         </AuthorizeView>
-        <MudMainContent Class="full-height">
-            <MudContainer Class="full-height" Gutters="false" MaxWidth="MaxWidth.ExtraLarge">
-                @Body
-            </MudContainer>
+        <MudMainContent>
+            @Body
         </MudMainContent>
     </MudLayout>
 }
@@ -65,7 +63,7 @@ else
     [Inject] public IServiceProvider Services { get; set; } = default!;
     public INavService Nav { get; set; } = default!;
 
-    private bool _drawerOpen = true;
+    private bool _drawerOpen = false;
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
     private bool _isAuthenticated;

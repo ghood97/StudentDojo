@@ -1,32 +1,66 @@
-﻿<MudItem xs="12" sm="6" md="3">
-    <MudCard>
-        <MudCardContent>
+﻿<MudCard>
+    <MudCardContent>
+        <MudStack>
             <MudStack Row Class="full">
-                @* <MudImage Width="200" Height="150" Src="" Alt="@Student.Name" ObjectFit="ObjectFit.Contain" /> *@
-                <MudText Typo="Typo.h6">@Student.Name</MudText>
+                @* <MudImage Width="200" Height="200" Src="@ImageUrl" Alt="@Student.Name" ObjectFit="ObjectFit.Contain" /> *@
+                <MudAvatar Style="height:50%; width:50%; font-size:2rem;">
+                    <MudImage Src="@ImageUrl"></MudImage>
+                </MudAvatar>
+                    
                 <MudSpacer />
-                <MudChip T="string" Color="Color.Success" Size="Size.Large">@Student.Points points</MudChip>
+                <MudProgressCircular Color="Color.Success" Rounded="true" Style="height:50%;width:50%;" StrokeWidth="4" Value="@(Student.Points * 10)">
+                    <ChildContent>
+                        <span style="font-size:1.5rem;">@Student.Points</span>
+                    </ChildContent>
+                </MudProgressCircular>
             </MudStack>
-        </MudCardContent>
-        <MudCardActions>
-            <MudStack Row Class="full">
-                <MudFab Size="Size.Small"
-                        Color="Color.Secondary"
-                        Label="Add point"
-                        StartIcon="@Icons.Material.Filled.Add"
-                        OnClick="@(() => OnPointsIncremented.InvokeAsync(Student.Id))" />
-                <MudFab Size="Size.Small"
-                        Color="Color.Info"
-                        Label="Redeem points"
-                        StartIcon="@Icons.Material.Filled.Add"
-                        OnClick="@(() => OnPointsRedeemed.InvokeAsync(Student.Id))" />
-            </MudStack>
-        </MudCardActions>
-    </MudCard>
-</MudItem>
+            <MudText Typo="Typo.h6">@Student.Name</MudText>
+        </MudStack>
+    </MudCardContent>
+    @* <MudCardActions>
+        <MudStack Row Class="full">
+            <MudFab Size="Size.Small"
+                    Color="Color.Secondary"
+                    Label="Add"
+                    StartIcon="@Icons.Material.Filled.Add"
+                    OnClick="@(() => OnPointsIncremented.InvokeAsync(Student.Id))" />
+            <MudFab Size="Size.Small"
+                    Color="Color.Info"
+                    Label="Redeem"
+                    StartIcon="@Icons.Material.Filled.EmojiEmotions"
+                    OnClick="@(() => OnPointsRedeemed.InvokeAsync(Student.Id))" />
+        </MudStack>
+    </MudCardActions> *@
+</MudCard>
 
 @code {
     [Parameter] public StudentDto Student { get; set; } = default!;
     [Parameter] public EventCallback<int> OnPointsIncremented { get; set; }
     [Parameter] public EventCallback<int> OnPointsRedeemed { get; set; }
+
+    private static readonly string[] AnimalImages = new[]
+    {
+        "bear.png",
+        "bunny.png",
+        "cat.png",
+        "chicken.png",
+        "cow.png",
+        "deer.png",
+        "dog.png",
+        "elephant.png",
+        "fox.png",
+        "giraffe.png",
+        "goat.png",
+        "koala.png",
+        "lion.png",
+        "monkey.png",
+        "owl.png",
+        "panda.png",
+        "pig.png",
+        "racoon.png",
+        "tiger.png",
+        "wolf.png"
+    };
+
+    public string ImageUrl => $"images/{AnimalImages[Student.Id % AnimalImages.Length]}";
 }

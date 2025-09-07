@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using StudentDojo.Client.Components.Dialogs;
 using StudentDojo.Client.Services;
@@ -21,6 +22,7 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
     private ClassroomDto _classroom { get; set; } = new();
     private bool _isLoading = true;
     private bool _isConnected = false;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
     [Parameter] public int ClassroomId { get; set; }
 
     public Classroom(
@@ -89,6 +91,15 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
         StudentDto? student = _classroom.Students.FirstOrDefault(s => s.Id == studentId);
         if (student is not null && student.Points != newPoints)
         {
+            int delta = newPoints - student.Points;
+            if (delta > 0)
+            {
+                JS.InvokeVoidAsync("playAudio", "sounds/add-point.mp3");
+            }
+            else if (delta < 0)
+            {
+                JS.InvokeVoidAsync("playAudio", "sounds/redeem.mp3");
+            }
             student.Points = newPoints;
             InvokeAsync(() => _snackbar.Add($"Points updated for {student.Name}. New Points {newPoints}", severity: Severity.Warning));
             InvokeAsync(StateHasChanged);
@@ -110,7 +121,7 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
 
     private async Task RedeemPointsAsync(int studentId)
     {
-        IDialogReference dialog = await _dialogService.ShowAsync<RedeemPointsDialog>();
+        IDialogReference dialog = await _dialogService.ShowAsync<StudentDialog>();
         DialogResult? result = await dialog.Result;
         if (result is not null && !result.Canceled)
         {
