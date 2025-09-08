@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.JSInterop;
 using MudBlazor;
 using StudentDojo.Client.Components.Dialogs;
 using StudentDojo.Client.Services;
 using StudentDojo.Client.Services.Api;
+using StudentDojo.Core.Data.Entities;
 using StudentDojo.Core.DataTransfer;
 using System;
 using System.Collections.Generic;
@@ -135,6 +137,40 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
             else
             {
                 await InvokeAsync(() => _snackbar.Add($"Failed to redeem points: {res.Problem.Title}", Severity.Error));
+            }
+        }
+    }
+
+    private async Task OpenStudentPointsDialog(StudentDto student)
+    {
+        DialogParameters parameters = new DialogParameters { { "Student", student } };
+        DialogOptions options = new() { CloseButton = true };
+
+        IDialogReference dialog = await _dialogService.ShowAsync<StudentDialog>("Student Points", parameters, options);
+        DialogResult? result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            string action = (string)result.Data!;
+            ApiResponse<int>? res = null;
+            switch (action)
+            {
+                case "add":
+                    res = await _studentService.IncrementPointsAsync(ClassroomId, student.Id, 1);
+                    break;
+                case "redeem":
+                    res = await _studentService.RedeemPointsAsync(ClassroomId, student.Id, 10);
+                    break;
+
+            }
+            if (res is not null && res.IsSuccess)
+            {
+                OnPointsUpdated(student.Id, res.Data);
+                //await InvokeAsync(() => _snackbar.Add($"Successfully {action}ed points.", Severity.Success));
+            }
+            else
+            {
+                await InvokeAsync(() => _snackbar.Add($"Failed to {action} points: {res.Problem.Title}", Severity.Error));
             }
         }
     }

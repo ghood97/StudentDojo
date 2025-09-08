@@ -1,4 +1,4 @@
-﻿<MudCard>
+﻿<MudCard onclick="@(() => OnClick.InvokeAsync(Student))">
     <MudCardContent>
         <MudStack>
             <MudStack Row Class="full">
@@ -36,7 +36,7 @@
 @code {
     [Parameter] public StudentDto Student { get; set; } = default!;
     [Parameter] public EventCallback<int> OnPointsIncremented { get; set; }
-    [Parameter] public EventCallback<int> OnPointsRedeemed { get; set; }
+    [Parameter] public EventCallback<StudentDto> OnClick { get; set; }
 
     private static readonly string[] AnimalImages = new[]
     {

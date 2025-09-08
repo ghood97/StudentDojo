@@ -1,4 +1,4 @@
-﻿<MudChip OnClick="" T="string" Size="Size.Large" class="pr-0 justify-start" Style="width:100%;">
+﻿<MudChip T="string" Size="Size.Large" OnClick="@(() => OnClick.InvokeAsync(Student))" class="pr-0 justify-start" Style="width:100%;">
     <AvatarContent>
         <MudAvatar>
             <MudImage Src="@ImageUrl"></MudImage>
@@ -16,8 +16,7 @@
 
 @code {
     [Parameter] public StudentDto Student { get; set; } = default!;
-    [Parameter] public EventCallback<int> OnPointsIncremented { get; set; }
-    [Parameter] public EventCallback<int> OnPointsRedeemed { get; set; }
+    [Parameter] public EventCallback<StudentDto> OnClick { get; set; }
 
     private static readonly string[] AnimalImages = new[]
     {

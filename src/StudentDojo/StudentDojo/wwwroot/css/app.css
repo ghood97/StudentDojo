@@ -204,3 +204,7 @@ html {
         max-width: calc(100vw - 32px);
     }
 }
+
+.mud-chip-content {
+    width: 100%
+}

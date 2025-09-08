@@ -33,10 +33,10 @@
                     {
                         <MudItem xs="6" md="2">
                             <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                                <StudentCard Student="@student" OnPointsIncremented="IncrementStudentPointsAsync" OnPointsRedeemed="RedeemPointsAsync" />
+                                <StudentCard Student="@student" OnPointsIncremented="IncrementStudentPointsAsync" OnClick="OpenStudentPointsDialog" />
                             </MudHidden>
                             <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                                <StudentChip OnPointsRedeemed="RedeemPointsAsync" Student="@student"></StudentChip>
+                                <StudentChip OnClick="OpenStudentPointsDialog" Student="@student"></StudentChip>
                             </MudHidden>
                         </MudItem>
                     }
