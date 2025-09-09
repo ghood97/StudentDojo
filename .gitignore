@@ -365,5 +365,5 @@ FodyWeavers.xsd
 docker-compose.override.yml
 
 appsettings.Development.json
+appsettings.Production.json
 .azure
-/src/StudentDojo/StudentDojo/appsettings.Production.json
