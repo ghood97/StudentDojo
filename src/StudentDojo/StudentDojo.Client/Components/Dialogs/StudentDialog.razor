@@ -9,7 +9,7 @@
         <MudChip T="string" OnClick="AddPoint" Color="Color.Primary" Icon="@Icons.Material.Filled.ExposurePlus1">Respect</MudChip>
         <MudChip T="string" OnClick="AddPoint" Color="Color.Primary" Icon="@Icons.Material.Filled.ExposurePlus1">Responsibility</MudChip>
         <MudChip T="string" OnClick="AddPoint" Color="Color.Primary" Icon="@Icons.Material.Filled.ExposurePlus1">Kindness</MudChip>
-        @if (Student.Points > 10)
+        @if (Student.Points >= 10)
         {
             <MudDivider DividerType="DividerType.Middle" Class="my-4" />
             <MudText GutterBottom="true">Redeem a Coin</MudText>
