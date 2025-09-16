@@ -86,4 +86,31 @@ public class StudentsController : BaseController
             throw new Exception("Failed to redeem points");
         }
     }
+
+    [HttpPatch("points")]
+    public async Task<IActionResult> IncrementClassPointsAsync(
+    [FromRoute] int classroomId,
+    [FromBody] ClassroomPointsUpdateDto classroomPointsUpdate)
+    {
+        AwardPointsResults result = await _studentService.IncrementPointsForStudentsAsync(classroomId, classroomPointsUpdate);
+        if (result.Success)
+        {
+            await _pointHub.Clients
+                .Group($"Classroom-{classroomId}")
+                .SendAsync("ClassPointsUpdated", result.NewPoints);
+            return Ok(result.NewPoints);
+        }
+        else if (result.Error is ServiceError.NotFound)
+        {
+            return NotFoundProblem("Student not found");
+        }
+        else if (result.Error is ServiceError.Validation)
+        {
+            return BadRequestProblem("Invalid Classroom", "Student does not belong to the specified classroom");
+        }
+        else
+        {
+            throw new Exception("Failed to increment points");
+        }
+    }
 }

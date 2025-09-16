@@ -1,66 +1,44 @@
-﻿<MudCard onclick="@(() => OnClick.InvokeAsync(Student))">
-    <MudCardContent>
-        <MudStack>
-            <MudStack Row Class="full">
-                @* <MudImage Width="200" Height="200" Src="@ImageUrl" Alt="@Student.Name" ObjectFit="ObjectFit.Contain" /> *@
-                <MudAvatar Style="height:50%; width:50%; font-size:2rem;">
-                    <MudImage Src="@ImageUrl"></MudImage>
-                </MudAvatar>
-                    
-                <MudSpacer />
-                <MudProgressCircular Color="Color.Success" Rounded="true" Style="height:50%;width:50%;" StrokeWidth="4" Value="@(Student.Points * 10)">
-                    <ChildContent>
-                        <span style="font-size:1.5rem;">@Student.Points</span>
-                    </ChildContent>
-                </MudProgressCircular>
+﻿@inject IAnimalImageService AnimalImageService
+
+<MudHidden Breakpoint="Breakpoint.SmAndDown">
+    <MudCard onclick="@(() => OnClick.InvokeAsync(Student))">
+        <MudCardContent>
+            <MudStack>
+                <MudStack Row Class="full">
+                    <MudAvatar Style="height:50%; width:50%; font-size:2rem;">
+                        <MudImage Src="@AnimalImageService.GetImageUrl(Student.Id)"></MudImage>
+                    </MudAvatar>
+
+                    <MudSpacer />
+                    <MudProgressCircular Color="Color.Success" Rounded="true" Style="height:50%;width:50%;" StrokeWidth="4" Value="@(Student.Points * 10)">
+                        <ChildContent>
+                            <span style="font-size:1.5rem;">@Student.Points</span>
+                        </ChildContent>
+                    </MudProgressCircular>
+                </MudStack>
+                <MudText Typo="Typo.h6">@Student.Name</MudText>
             </MudStack>
-            <MudText Typo="Typo.h6">@Student.Name</MudText>
-        </MudStack>
-    </MudCardContent>
-    @* <MudCardActions>
-        <MudStack Row Class="full">
-            <MudFab Size="Size.Small"
-                    Color="Color.Secondary"
-                    Label="Add"
-                    StartIcon="@Icons.Material.Filled.Add"
-                    OnClick="@(() => OnPointsIncremented.InvokeAsync(Student.Id))" />
-            <MudFab Size="Size.Small"
-                    Color="Color.Info"
-                    Label="Redeem"
-                    StartIcon="@Icons.Material.Filled.EmojiEmotions"
-                    OnClick="@(() => OnPointsRedeemed.InvokeAsync(Student.Id))" />
-        </MudStack>
-    </MudCardActions> *@
-</MudCard>
+        </MudCardContent>
+    </MudCard>
+</MudHidden>
+<MudHidden Breakpoint="Breakpoint.MdAndUp">
+    <MudChip T="string" Size="Size.Large" OnClick="@(() => OnClick.InvokeAsync(Student))" class="pr-0 justify-start" Style="width:100%;">
+        <AvatarContent>
+            <MudAvatar>
+                <MudImage Src="@AnimalImageService.GetImageUrl(Student.Id)"></MudImage>
+            </MudAvatar>
+        </AvatarContent>
+        <ChildContent>
+            <span>@Student.Name</span>
+            <MudSpacer></MudSpacer>
+            <MudChip T="string" Style="align-self:flex-end">
+                @Student.Points
+            </MudChip>
+        </ChildContent>
+    </MudChip>
+</MudHidden>
 
 @code {
     [Parameter] public StudentDto Student { get; set; } = default!;
-    [Parameter] public EventCallback<int> OnPointsIncremented { get; set; }
     [Parameter] public EventCallback<StudentDto> OnClick { get; set; }
-
-    private static readonly string[] AnimalImages = new[]
-    {
-        "bear.png",
-        "bunny.png",
-        "cat.png",
-        "chicken.png",
-        "cow.png",
-        "deer.png",
-        "dog.png",
-        "elephant.png",
-        "fox.png",
-        "giraffe.png",
-        "goat.png",
-        "koala.png",
-        "lion.png",
-        "monkey.png",
-        "owl.png",
-        "panda.png",
-        "pig.png",
-        "racoon.png",
-        "tiger.png",
-        "wolf.png"
-    };
-
-    public string ImageUrl => $"images/{AnimalImages[Student.Id % AnimalImages.Length]}";
 }

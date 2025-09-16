@@ -108,35 +108,43 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
         }
     }
 
-    private async Task IncrementStudentPointsAsync(int studentId)
+    private async Task OpenClassroomPointsDialog(List<StudentDto> students)
     {
-        ApiResponse<int> res = await _studentService.IncrementPointsAsync(ClassroomId, studentId, 1);
-        if (res.IsSuccess)
-        {
-            OnPointsUpdated(studentId, res.Data);
-        }
-        else
-        {
-            await InvokeAsync(() => _snackbar.Add($"Failed to increment points: {res.Problem.Title}", Severity.Error));
-        }
-    }
-
-    private async Task RedeemPointsAsync(int studentId)
-    {
-        IDialogReference dialog = await _dialogService.ShowAsync<StudentDialog>();
+        DialogParameters parameters = new DialogParameters { { "Students", students } };
+        DialogOptions options = new() { CloseButton = true };
+        IDialogReference dialog = await _dialogService.ShowAsync<ClassroomPointsDialog>("Add Points to All Students", parameters, options);
         DialogResult? result = await dialog.Result;
         if (result is not null && !result.Canceled)
         {
-            int pointsToRedeem = (int)result.Data!;
-            ApiResponse<int> res = await _studentService.RedeemPointsAsync(ClassroomId, studentId, pointsToRedeem);
+            // Get the selected students from the dialog result
+            var selectedStudents = result.Data as List<StudentDto>;
+            if (selectedStudents is null || selectedStudents.Count == 0)
+            {
+                await InvokeAsync(() => _snackbar.Add("No students selected for update.", Severity.Warning));
+                return;
+            }
+
+            ClassroomPointsUpdateDto classroomPointsUpdate = new()
+            {
+                Updates = selectedStudents.Select(s => new StudentPointsUpdateDto
+                {
+                    StudentId = s.Id,
+                    Operation = "increment",
+                    Value = 1
+                }).ToList()
+            };
+            ApiResponse<List<StudentPointsDto>> res = await _studentService.IncrementClassPointsAsync(ClassroomId, classroomPointsUpdate);
             if (res.IsSuccess)
             {
-                OnPointsUpdated(studentId, res.Data);
-                await InvokeAsync(() => _snackbar.Add($"Successfully redeemed {pointsToRedeem} points.", Severity.Success));
+                foreach (StudentPointsDto update in res.Data)
+                {
+                    OnPointsUpdated(update.StudentId, update.Points);
+                }
+                await InvokeAsync(() => _snackbar.Add($"Successfully added points to selected students.", Severity.Success));
             }
             else
             {
-                await InvokeAsync(() => _snackbar.Add($"Failed to redeem points: {res.Problem.Title}", Severity.Error));
+                await InvokeAsync(() => _snackbar.Add($"Failed to add points: {res.Problem.Title}", Severity.Error));
             }
         }
     }

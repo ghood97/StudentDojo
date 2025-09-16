@@ -24,3 +24,9 @@ public class StudentDto
         Points = entity.Points;
     }
 }
+
+public class StudentPointsDto
+{
+    public int StudentId { get; set; }
+    public int Points { get; set; }
+}

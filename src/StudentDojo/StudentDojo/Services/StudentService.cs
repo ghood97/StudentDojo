@@ -9,6 +9,7 @@ public interface IStudentService
 {
     Task<StudentDto> CreateStudentAsync(StudentCreateDto createDto);
     Task<int> GetPointsAsync(int studentId);
+    Task<AwardPointsResults> IncrementPointsForStudentsAsync(int classroomId, ClassroomPointsUpdateDto classroomPointsUpdate);
     Task<AwardPointsResult> IncrementPointsForStudentAsync(int classroomId, int studentId, int pointsDelta);
     Task<RedeemPointsResult> RedeemPointsForStudentAsync(int classroomId, int studentId, int points);
 }
@@ -48,6 +49,40 @@ public class StudentService : IStudentService
             throw new InvalidOperationException("Student not found");
         }
         return student.Points;
+    }
+
+    public async Task<AwardPointsResults> IncrementPointsForStudentsAsync(int classroomId, ClassroomPointsUpdateDto classroomPointsUpdate)
+    {
+        var results = new List<StudentPointsDto>();
+        ServiceError? error = null;
+        bool allSuccess = true;
+
+        foreach (StudentPointsUpdateDto studentUpdate in classroomPointsUpdate.Updates)
+        {
+            Student? student = await _db.Students.FindAsync(studentUpdate.StudentId);
+            if (student == null)
+            {
+                _logger.LogWarning("Student with ID {StudentId} not found for incrementing points", studentUpdate.StudentId);
+                results.Add(new StudentPointsDto { StudentId = studentUpdate.StudentId, Points = 0 });
+                error ??= ServiceError.NotFound;
+                allSuccess = false;
+                continue;
+            }
+            if (student.ClassroomId != classroomId)
+            {
+                _logger.LogWarning("Student with ID {StudentId} does not belong to Classroom ID {ClassroomId}", studentUpdate.StudentId, classroomId);
+                results.Add(new StudentPointsDto { StudentId = student.Id, Points = student.Points });
+                error ??= ServiceError.Validation;
+                allSuccess = false;
+                continue;
+            }
+
+            student.Points += studentUpdate.Value;
+            results.Add(new StudentPointsDto { StudentId = student.Id, Points = student.Points });
+        }
+        await _db.SaveChangesAsync();
+
+        return new AwardPointsResults(allSuccess, error, results);
     }
 
     public async Task<AwardPointsResult> IncrementPointsForStudentAsync(int classroomId, int studentId, int pointsDelta)
@@ -93,6 +128,7 @@ public class StudentService : IStudentService
 }
 
 public sealed record AwardPointsResult(bool Success, ServiceError? Error, int NewPoints);
+public sealed record AwardPointsResults(bool Success, ServiceError? Error, List<StudentPointsDto> NewPoints);
 
 public sealed record RedeemPointsResult(bool Success, RedeemPointsError? Error, int NewPoints);
 

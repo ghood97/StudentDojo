@@ -17,6 +17,7 @@ public static class DependencyInjection
     {
         services.AddScoped<INavService, NavService>();
         services.AddScoped<PointHubService>();
+        services.AddScoped<IAnimalImageService, AnimalImageService>();
         return services;
     }
 }

@@ -29,15 +29,13 @@
         {
             <MudContainer MaxWidth="MaxWidth.ExtraLarge" Gutters=false>
                 <MudGrid Justify="Justify.FlexStart" Spacing="3">
+                    <MudItem xs="12" md="2">
+                        <ClassroomCard Students="@_classroom.Students.ToList()" OnClick="OpenClassroomPointsDialog" GroupName="@_classroom.ClassName" />
+                    </MudItem>
                     @foreach (StudentDto student in _classroom.Students)
                     {
                         <MudItem xs="6" md="2">
-                            <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                                <StudentCard Student="@student" OnPointsIncremented="IncrementStudentPointsAsync" OnClick="OpenStudentPointsDialog" />
-                            </MudHidden>
-                            <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                                <StudentChip OnClick="OpenStudentPointsDialog" Student="@student"></StudentChip>
-                            </MudHidden>
+                            <StudentCard Student="@student" OnClick="OpenStudentPointsDialog" />
                         </MudItem>
                     }
                 </MudGrid>
