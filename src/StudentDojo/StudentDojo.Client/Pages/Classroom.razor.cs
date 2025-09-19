@@ -88,6 +88,16 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
         _nav.NavigateTo($"/classrooms/{ClassroomId}/createStudent");
     }
 
+    private void UpdateStudentPoints(int studentId, int newPoints)
+    {
+        StudentDto? student = _classroom.Students.FirstOrDefault(s => s.Id == studentId);
+        if (student is not null)
+        {
+            student.Points = newPoints;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
     private void OnPointsUpdated(int studentId, int newPoints)
     {
         StudentDto? student = _classroom.Students.FirstOrDefault(s => s.Id == studentId);
@@ -102,9 +112,7 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
             {
                 JS.InvokeVoidAsync("playAudio", "sounds/redeem.mp3");
             }
-            student.Points = newPoints;
-            InvokeAsync(() => _snackbar.Add($"Points updated for {student.Name}. New Points {newPoints}", severity: Severity.Warning));
-            InvokeAsync(StateHasChanged);
+            UpdateStudentPoints(studentId, newPoints);
         }
     }
 
@@ -138,8 +146,9 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
             {
                 foreach (StudentPointsDto update in res.Data)
                 {
-                    OnPointsUpdated(update.StudentId, update.Points);
+                    UpdateStudentPoints(update.StudentId, update.Points);
                 }
+                await JS.InvokeVoidAsync("playAudio", "sounds/add-point.mp3");
                 await InvokeAsync(() => _snackbar.Add($"Successfully added points to selected students.", Severity.Success));
             }
             else
@@ -173,8 +182,8 @@ public partial class Classroom : ComponentBase, IAsyncDisposable
             }
             if (res is not null && res.IsSuccess)
             {
-                OnPointsUpdated(student.Id, res.Data);
-                //await InvokeAsync(() => _snackbar.Add($"Successfully {action}ed points.", Severity.Success));
+                UpdateStudentPoints(student.Id, res.Data);
+                await InvokeAsync(() => _snackbar.Add($"Successfully {action}ed points.", Severity.Success));
             }
             else
             {
