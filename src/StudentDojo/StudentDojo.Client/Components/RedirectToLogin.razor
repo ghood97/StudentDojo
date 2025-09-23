@@ -1,0 +1,13 @@
+﻿
+@inject INavService Nav
+
+<SplashScreen Title="Authorizing" Message="This won't take long...'" />
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        Nav.NavigateTo("/auth/login", redirectUri: Nav.RelativeUri, forceLoad: true);
+    }
+
+}

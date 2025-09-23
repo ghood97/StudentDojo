@@ -14,9 +14,9 @@ public enum ConnectionEvent
 public class CounterService : IAsyncDisposable
 {
     private HubConnection? _hubConnection;
-    private readonly NavigationManager _nav;
+    private readonly INavService _nav;
 
-    public CounterService(NavigationManager nav)
+    public CounterService(INavService nav)
     {
         _nav = nav;
     }

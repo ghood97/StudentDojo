@@ -1,25 +1,56 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims
+@inherits LayoutComponentBase
+@implements IDisposable
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-<MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Student Dojo</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-    </MudAppBar>
-    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent Class="pt-16 pa-4">
-        @Body
-    </MudMainContent>
-</MudLayout>
 
+@if (!RendererInfo.IsInteractive)
+{
+    <PrerenderSkeleton />
+}
+else
+{
+    <MudLayout>
+        <MudAppBar Elevation="1">
+            <AuthorizeView>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+            </AuthorizeView>
+            <MudText Typo="Typo.h5" Class="ml-3">Student Dojo</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+            <AuthorizeView>
+                @if (!string.IsNullOrEmpty(_initials) && string.IsNullOrEmpty(_pictureUrl))
+                {
+                    <MudAvatar Color="Color.Primary" Size="Size.Medium">@_initials</MudAvatar>
+                }
+                else if (!string.IsNullOrEmpty(_pictureUrl))
+                {
+                    <MudAvatar Size="Size.Medium">
+                        <MudImage Src="@_pictureUrl"></MudImage>
+                    </MudAvatar>
+                }
+                else
+                {
+                    <MudAvatar Color="Color.Primary" Size="Size.Medium">?</MudAvatar>
+                }
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit">
+                    <MudMenuItem OnClick="@Logout">Logout</MudMenuItem>
+                </MudMenu>
+            </AuthorizeView>
+        </MudAppBar>
+        <AuthorizeView>
+            <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+                <NavMenu />
+            </MudDrawer>
+        </AuthorizeView>
+        <MudMainContent>
+            @Body
+        </MudMainContent>
+    </MudLayout>
+}
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -28,13 +59,26 @@
 </div>
 
 @code {
-    private bool _drawerOpen = true;
+    [Inject] public AuthenticationStateProvider AuthProvider { get; set; } = default!;
+    [Inject] public IServiceProvider Services { get; set; } = default!;
+    public INavService Nav { get; set; } = default!;
+
+    private bool _drawerOpen = false;
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
+    private bool _isAuthenticated;
+    private string? _pictureUrl;
+    private string? _initials;
 
     protected override void OnInitialized()
     {
-        base.OnInitialized();
+        if (RendererInfo.IsInteractive && Nav is null)
+        {
+            Nav = Services.GetRequiredService<INavService>();
+            // safe to use _nav from here on (only in interactive branch)
+        }
+        OnAuthChangedAsync(AuthProvider.GetAuthenticationStateAsync());
+        AuthProvider.AuthenticationStateChanged += OnAuthChangedAsync;
 
         _theme = new()
         {
@@ -52,6 +96,36 @@
     private void DarkModeToggle()
     {
         _isDarkMode = !_isDarkMode;
+    }
+
+    private void Logout()
+    {
+        Nav.NavigateTo("auth/logout", redirectUri: "/", forceLoad: true);
+    }
+
+    private async void OnAuthChangedAsync(Task<AuthenticationState> stateTask)
+    {
+        AuthenticationState authState = await stateTask;
+        _isAuthenticated = authState.User.Identity?.IsAuthenticated == true;
+
+        if (_isAuthenticated)
+        {
+            ClaimsPrincipal user = authState.User;
+            _pictureUrl = user.FindFirst("picture")?.Value;
+
+            if (string.IsNullOrEmpty(_pictureUrl))
+            {
+                string name = user.Identity?.Name ?? "";
+                _initials = string.Join("", name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(n => n[0]))
+                                .ToUpperInvariant();
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        AuthProvider.AuthenticationStateChanged -= OnAuthChangedAsync;
     }
 
     private readonly PaletteLight _lightPalette = new()
@@ -98,6 +172,8 @@
         true => Icons.Material.Rounded.AutoMode,
         false => Icons.Material.Outlined.DarkMode,
     };
+
+  
 }
 
 

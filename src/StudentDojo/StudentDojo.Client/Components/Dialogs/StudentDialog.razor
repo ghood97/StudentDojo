@@ -1,0 +1,48 @@
+﻿<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @Student.Name has @Student.Points Points
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudChip T="string" OnClick="AddPoint" Color="Color.Primary" Icon="@Icons.Material.Filled.ExposurePlus1">Effort</MudChip>
+        <MudChip T="string" OnClick="AddPoint" Color="Color.Primary" Icon="@Icons.Material.Filled.ExposurePlus1">Respect</MudChip>
+        <MudChip T="string" OnClick="AddPoint" Color="Color.Primary" Icon="@Icons.Material.Filled.ExposurePlus1">Responsibility</MudChip>
+        <MudChip T="string" OnClick="AddPoint" Color="Color.Primary" Icon="@Icons.Material.Filled.ExposurePlus1">Kindness</MudChip>
+        @if (Student.Points >= 10)
+        {
+            <MudDivider DividerType="DividerType.Middle" Class="my-4" />
+            <MudText GutterBottom="true">Redeem a Coin</MudText>
+            <MudChip T="string" OnClick="RedeemPoints" Color="Color.Warning" Icon="@Icons.Material.Filled.CurrencyExchange">10 points</MudChip>
+        }
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public StudentDto Student { get; set; } = new StudentDto();
+
+    [Inject] ISnackbar Snackbar { get; set; } = default!;
+
+    private int _pointsToRedeem = 10;
+
+    private void Cancel() => Dialog.Cancel();
+
+    private void RedeemPoints()
+    {
+        if (_pointsToRedeem < 1)
+        {
+            Snackbar.Add("You must redeem at least 1 point.", Severity.Error);
+            return;
+        }
+        Dialog.Close(DialogResult.Ok("redeem"));
+    }
+
+    private void AddPoint()
+    {
+        Dialog.Close(DialogResult.Ok("add"));
+    }
+}

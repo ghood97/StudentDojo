@@ -1,0 +1,66 @@
+﻿<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Add Point to Students
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudChipSet T="bool" MultiSelection="true">
+            @foreach (var student in Students)
+            {
+                <MudChip 
+                    Clickable="true"
+                    Selected="SelectedStudentIds.Contains(student.Id)"
+                    OnClick="@(() => ToggleSelection(student.Id, !SelectedStudentIds.Contains(student.Id)))"
+                    Color="SelectedStudentIds.Contains(student.Id) ? Color.Primary : Color.Default"
+                    Icon="@(SelectedStudentIds.Contains(student.Id) ? @Icons.Material.Filled.Check : null)"
+                    >
+                    @student.Name
+                </MudChip>
+            }
+        </MudChipSet>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="AddPointToSelected">Add Point</MudButton>
+        <MudButton Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter]
+    public List<StudentDto> Students { get; set; } = new();
+
+    [Inject] ISnackbar Snackbar { get; set; } = default!;
+
+    private void Cancel() => Dialog.Cancel();
+
+    private void AddPointToSelected()
+    {
+        var selected = Students.Where(s => SelectedStudentIds.Contains(s.Id)).ToList();
+        if (!selected.Any())
+        {
+            Snackbar.Add("Please select at least one student.", Severity.Error);
+            return;
+        }
+        Dialog.Close(DialogResult.Ok(selected));
+    }
+
+    private HashSet<int> SelectedStudentIds = new();
+
+    protected override void OnParametersSet()
+    {
+        // Ensure all students are selected when dialog opens
+        SelectedStudentIds = Students.Select(s => s.Id).ToHashSet();
+    }
+
+    private void ToggleSelection(int studentId, bool isSelected)
+    {
+        if (isSelected)
+            SelectedStudentIds.Add(studentId);
+        else
+            SelectedStudentIds.Remove(studentId);
+    }
+}

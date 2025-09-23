@@ -1,0 +1,49 @@
+﻿@inject IAnimalImageService AnimalImageService
+
+<MudHidden Breakpoint="Breakpoint.SmAndDown">
+    <MudCard onclick="@(() => OnClick.InvokeAsync(Students))" Style="height:100%;">
+        <MudCardContent>
+            <MudStack Style="height:100%">
+                    <MudAvatarGroup Max="4" Spacing="7">
+                        @foreach (var student in Students.Take(4))
+                        {
+                            <MudAvatar Style="height:clamp(32px,4vw,64px); width:clamp(32px,4vw,64px);">
+                                <MudImage Src="@AnimalImageService.GetImageUrl(student.Id)"></MudImage>
+                            </MudAvatar>
+                        }
+                    </MudAvatarGroup>
+                <MudSpacer />
+                <MudText Typo="Typo.h6">@GroupName</MudText>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+</MudHidden>
+<MudHidden Breakpoint="Breakpoint.MdAndUp">
+    <MudChip T="string" Size="Size.Large" OnClick="@(() => OnClick.InvokeAsync(Students))" class="pr-0 justify-start" Style="width:100%;">
+        <AvatarContent>
+            <MudAvatarGroup Max="3">
+                @foreach (var student in Students.Take(3))
+                {
+                    <MudAvatar>
+                        <MudImage Src="@AnimalImageService.GetImageUrl(student.Id)"></MudImage>
+                    </MudAvatar>
+                }
+            </MudAvatarGroup>
+        </AvatarContent>
+        <ChildContent>
+            <span>@GroupName</span>
+            <MudSpacer></MudSpacer>
+            <MudChip T="string" Style="align-self:flex-end">
+                @TotalPoints
+            </MudChip>
+        </ChildContent>
+    </MudChip>
+</MudHidden>
+
+@code {
+    [Parameter] public List<StudentDto> Students { get; set; } = new();
+    [Parameter] public EventCallback<List<StudentDto>> OnClick { get; set; }
+    [Parameter] public string? GroupName { get; set; }
+
+    private int TotalPoints => Students.Sum(s => s.Points);
+}

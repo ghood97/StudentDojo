@@ -1,0 +1,40 @@
+﻿<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            How many points would you like to redeems?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="_pointsToRedeem"
+                      Label="Points to Redeem"
+                      Variant="Variant.Outlined"
+                      InputMode="InputMode.numeric"
+                      InputType="InputType.Number"
+                      FullWidth="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="RedeemPoints">Redeem Points</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance Dialog { get; set; } = default!;
+
+    [Inject] ISnackbar Snackbar { get; set; } = default!;
+
+    private int _pointsToRedeem = 1;
+
+    private void Cancel() => Dialog.Cancel();
+
+    private void RedeemPoints()
+    {
+        if (_pointsToRedeem < 1)
+        {
+            Snackbar.Add("You must redeem at least 1 point.", Severity.Error);
+            return;
+        }
+        Dialog.Close(DialogResult.Ok(_pointsToRedeem));
+    }
+}

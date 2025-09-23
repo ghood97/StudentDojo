@@ -1,0 +1,46 @@
+﻿@page "/classrooms/{ClassroomId:int}"
+
+<PageTitle>@_classroom?.ClassName </PageTitle>
+
+<MudContainer Class="pt-3" MaxWidth="MaxWidth.ExtraLarge">
+    <MudStack>
+        <MudStack Row>
+            <MudText Typo="Typo.h3">
+                @_classroom?.ClassName
+            </MudText>
+            <MudIconButton Size="Size.Large" Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="OnCreateStudent"/>
+        </MudStack>
+        <MudSpacer />
+        @if (_isLoading)
+        {
+            <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+        }
+        else if (!_classroom.Students.Any())
+        {
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Align="Align.Center">
+                        You do not have any students yet. Click the + button to add a student.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Gutters=false>
+                <MudGrid Justify="Justify.FlexStart" Spacing="3">
+                    <MudItem xs="12" md="2">
+                        <ClassroomCard Students="@_classroom.Students.ToList()" OnClick="OpenClassroomPointsDialog" GroupName="@_classroom.ClassName" />
+                    </MudItem>
+                    @foreach (StudentDto student in _classroom.Students)
+                    {
+                        <MudItem xs="6" md="2">
+                            <StudentCard Student="@student" OnClick="OpenStudentPointsDialog" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudContainer>
+
+        }
+    </MudStack>
+</MudContainer>

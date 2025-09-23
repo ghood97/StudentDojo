@@ -1,11 +1,17 @@
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using StudentDojo.Client.Pages;
 using StudentDojo.Components;
+using StudentDojo.Core.Data;
+using StudentDojo.Extensions;
 using StudentDojo.Hubs;
+using StudentDojo.Middleware;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+builder.Services.AddGoogleAuth(builder.Configuration);
+builder.Services.AddAuthorization();
 
 // Add MudBlazor services
 builder.Services.AddMudServices(config =>
@@ -22,11 +28,39 @@ builder.Services.AddSignalR(options =>
     options.EnableDetailedErrors = true;
 });
 
+builder.Services.AddDbContextFactory<StudentDojoDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("StudentDojoDb"));
+});
+
+builder.Services.AddStudentDojoServices();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveWebAssemblyComponents();
+    .AddInteractiveWebAssemblyComponents()
+    .AddAuthenticationStateSerialization(options =>
+    {
+        options.SerializeAllClaims = true;
+    });
 
-var app = builder.Build();
+builder.Services.AddCascadingAuthenticationState(); // for Blazor
+
+builder.Services.AddControllers();
+
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = ctx =>
+    {
+        ctx.ProblemDetails.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier;
+    };
+});
+
+builder.Services.AddHttpContextAccessor();
+
+WebApplication app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapDefaultEndpoints();
 
@@ -37,17 +71,21 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAntiforgery();
 
 app.MapHub<CounterHub>("/counterHub");
+app.MapHub<PointHub>("/pointHub");
+
+app.MapControllers();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

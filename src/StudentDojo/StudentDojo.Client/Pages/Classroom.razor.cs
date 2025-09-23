@@ -1,0 +1,203 @@
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.JSInterop;
+using MudBlazor;
+using StudentDojo.Client.Components.Dialogs;
+using StudentDojo.Client.Services;
+using StudentDojo.Client.Services.Api;
+using StudentDojo.Core.Data.Entities;
+using StudentDojo.Core.DataTransfer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace StudentDojo.Client.Pages;
+public partial class Classroom : ComponentBase, IAsyncDisposable
+{
+    private readonly IClassroomApiService _classroomService;
+    private readonly IStudentApiService _studentService;
+    private readonly ISnackbar _snackbar;
+    private readonly IDialogService _dialogService;
+    private readonly INavService _nav;
+    private readonly PointHubService _pointHubService;
+
+    private ClassroomDto _classroom { get; set; } = new();
+    private bool _isLoading = true;
+    private bool _isConnected = false;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Parameter] public int ClassroomId { get; set; }
+
+    public Classroom(
+        IClassroomApiService classroomService,
+        IStudentApiService studentService,
+        PointHubService pointService,
+        ISnackbar snackbar,
+        IDialogService dialogService,
+        INavService nav)
+    {
+        _classroomService = classroomService;
+        _studentService = studentService;
+        _snackbar = snackbar;
+        _dialogService = dialogService;
+        _nav = nav;
+        _pointHubService = pointService;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<ClassroomDto> response = await _classroomService.GetClassroomByIdAsync(ClassroomId);
+        if (response.IsSuccess)
+        {
+            _classroom = response.Data;
+            _pointHubService.PointsUpdated += OnPointsUpdated;
+            _pointHubService.ConnectionChanged += OnConnChanged;
+            await _pointHubService.StartAsync();
+            await _pointHubService.SubscribeToClassroomAsync(ClassroomId);
+            _isConnected = true;
+        }
+        else
+        {
+            _snackbar.Add($"Failed to load classrooms: {response.Problem.Title}", Severity.Error);
+        }
+
+        _isLoading = false;
+    }
+
+    private void OnConnChanged(ConnectionEvent e)
+    {
+        switch (e)
+        {
+            case ConnectionEvent.Reconnecting:
+                _isConnected = false;
+                InvokeAsync(() => _snackbar.Add("Connection lost. Reconnecting...", Severity.Warning));
+                break;
+            case ConnectionEvent.Reconnected:
+                _isConnected = true;
+                InvokeAsync(() => _snackbar.Add("Reconnected.", Severity.Success));
+                break;
+            case ConnectionEvent.Closed:
+                _isConnected = false;
+                InvokeAsync(() => _snackbar.Add("Connection closed.", Severity.Error));
+                break;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnCreateStudent()
+    {
+        _nav.NavigateTo($"/classrooms/{ClassroomId}/createStudent");
+    }
+
+    private void UpdateStudentPoints(int studentId, int newPoints)
+    {
+        StudentDto? student = _classroom.Students.FirstOrDefault(s => s.Id == studentId);
+        if (student is not null)
+        {
+            student.Points = newPoints;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void OnPointsUpdated(int studentId, int newPoints)
+    {
+        StudentDto? student = _classroom.Students.FirstOrDefault(s => s.Id == studentId);
+        if (student is not null && student.Points != newPoints)
+        {
+            int delta = newPoints - student.Points;
+            if (delta > 0)
+            {
+                JS.InvokeVoidAsync("playAudio", "sounds/add-point.mp3");
+            }
+            else if (delta < 0)
+            {
+                JS.InvokeVoidAsync("playAudio", "sounds/redeem.mp3");
+            }
+            UpdateStudentPoints(studentId, newPoints);
+        }
+    }
+
+    private async Task OpenClassroomPointsDialog(List<StudentDto> students)
+    {
+        DialogParameters parameters = new DialogParameters { { "Students", students } };
+        DialogOptions options = new() { CloseButton = true };
+        IDialogReference dialog = await _dialogService.ShowAsync<ClassroomPointsDialog>("Add Points to All Students", parameters, options);
+        DialogResult? result = await dialog.Result;
+        if (result is not null && !result.Canceled)
+        {
+            // Get the selected students from the dialog result
+            var selectedStudents = result.Data as List<StudentDto>;
+            if (selectedStudents is null || selectedStudents.Count == 0)
+            {
+                await InvokeAsync(() => _snackbar.Add("No students selected for update.", Severity.Warning));
+                return;
+            }
+
+            ClassroomPointsUpdateDto classroomPointsUpdate = new()
+            {
+                Updates = selectedStudents.Select(s => new StudentPointsUpdateDto
+                {
+                    StudentId = s.Id,
+                    Operation = "increment",
+                    Value = 1
+                }).ToList()
+            };
+            ApiResponse<List<StudentPointsDto>> res = await _studentService.IncrementClassPointsAsync(ClassroomId, classroomPointsUpdate);
+            if (res.IsSuccess)
+            {
+                foreach (StudentPointsDto update in res.Data)
+                {
+                    UpdateStudentPoints(update.StudentId, update.Points);
+                }
+                await JS.InvokeVoidAsync("playAudio", "sounds/add-point.mp3");
+                await InvokeAsync(() => _snackbar.Add($"Successfully added points to selected students.", Severity.Success));
+            }
+            else
+            {
+                await InvokeAsync(() => _snackbar.Add($"Failed to add points: {res.Problem.Title}", Severity.Error));
+            }
+        }
+    }
+
+    private async Task OpenStudentPointsDialog(StudentDto student)
+    {
+        DialogParameters parameters = new DialogParameters { { "Student", student } };
+        DialogOptions options = new() { CloseButton = true };
+
+        IDialogReference dialog = await _dialogService.ShowAsync<StudentDialog>("Student Points", parameters, options);
+        DialogResult? result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            string action = (string)result.Data!;
+            ApiResponse<int>? res = null;
+            switch (action)
+            {
+                case "add":
+                    res = await _studentService.IncrementPointsAsync(ClassroomId, student.Id, 1);
+                    break;
+                case "redeem":
+                    res = await _studentService.RedeemPointsAsync(ClassroomId, student.Id, 10);
+                    break;
+
+            }
+            if (res is not null && res.IsSuccess)
+            {
+                UpdateStudentPoints(student.Id, res.Data);
+                await InvokeAsync(() => _snackbar.Add($"Successfully {action}ed points.", Severity.Success));
+            }
+            else
+            {
+                await InvokeAsync(() => _snackbar.Add($"Failed to {action} points: {res.Problem.Title}", Severity.Error));
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _pointHubService.PointsUpdated -= OnPointsUpdated;
+        _pointHubService.ConnectionChanged -= OnConnChanged;
+        await _pointHubService.UnsubscribeFromClassroomAsync(ClassroomId);
+        await _pointHubService.DisposeAsync();
+        GC.SuppressFinalize(this);
+    }
+}
